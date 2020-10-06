@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "abdf1a02_249f7597",
+        "filename": "app/src/main/res/values/strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2020-10-06T12:47:20Z",
+      "side": 1,
+      "message": "These 3 lines created a conflict for some reason.",
+      "revId": "dadb2cc2084b4cfa3c76ce7e7cc8ebc76983c248",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
+    }
+  ]
+}
