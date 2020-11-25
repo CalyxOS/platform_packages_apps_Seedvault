@@ -2,21 +2,22 @@ package com.stevesoltys.seedvault.transport
 
 import android.app.Service
 import android.app.backup.BackupManager
-import android.app.backup.BackupManager.FLAG_NON_INCREMENTAL_BACKUP
-import android.app.backup.BackupTransport.FLAG_USER_INITIATED
+import android.app.backup.BackupManager.FLAG_NON_INCREMENTAL_BACKUP // ktlint-disable no-unused-imports
 import android.app.backup.IBackupManager
 import android.content.Context
-import android.content.Context.BACKUP_SERVICE
+import android.content.Context.BACKUP_SERVICE // ktlint-disable no-unused-imports
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.stevesoltys.seedvault.BackupMonitor
-import com.stevesoltys.seedvault.BackupNotificationManager
-import com.stevesoltys.seedvault.NotificationBackupObserver
 import com.stevesoltys.seedvault.transport.backup.PackageService
-import org.koin.core.context.GlobalContext.get
+import com.stevesoltys.seedvault.ui.notification.BackupNotificationManager
+import com.stevesoltys.seedvault.ui.notification.NotificationBackupObserver
+import org.koin.core.KoinComponent
+import org.koin.core.context.KoinContextHandler.get
+import org.koin.core.inject
 
 private val TAG = ConfigurableBackupTransportService::class.java.simpleName
 
@@ -24,9 +25,11 @@ private val TAG = ConfigurableBackupTransportService::class.java.simpleName
  * @author Steve Soltys
  * @author Torsten Grote
  */
-class ConfigurableBackupTransportService : Service() {
+class ConfigurableBackupTransportService : Service(), KoinComponent {
 
     private var transport: ConfigurableBackupTransport? = null
+
+    private val notificationManager: BackupNotificationManager by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -43,6 +46,7 @@ class ConfigurableBackupTransportService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        notificationManager.onBackupBackgroundFinished()
         transport = null
         Log.d(TAG, "Service destroyed.")
     }
@@ -51,16 +55,17 @@ class ConfigurableBackupTransportService : Service() {
 
 @WorkerThread
 fun requestBackup(context: Context) {
-    val packageService: PackageService = get().koin.get()
+    val packageService: PackageService = get().get()
     val packages = packageService.eligiblePackages
+    val appTotals = packageService.expectedAppTotals
 
-    val observer = NotificationBackupObserver(context, packages.size, true)
+    val observer = NotificationBackupObserver(context, packages.size, appTotals)
     val result = try {
-        val backupManager: IBackupManager = get().koin.get()
-        backupManager.requestBackup(packages, observer, BackupMonitor(), FLAG_USER_INITIATED)
+        val backupManager: IBackupManager = get().get()
+        backupManager.requestBackup(packages, observer, BackupMonitor(), 0)
     } catch (e: RemoteException) {
         Log.e(TAG, "Error during backup: ", e)
-        val nm: BackupNotificationManager = get().koin.get()
+        val nm: BackupNotificationManager = get().get()
         nm.onBackupError()
     }
     if (result == BackupManager.SUCCESS) {

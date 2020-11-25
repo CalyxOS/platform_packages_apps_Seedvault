@@ -7,9 +7,9 @@ import com.stevesoltys.seedvault.settings.SettingsManager
 import com.stevesoltys.seedvault.ui.storage.StorageViewModel
 
 abstract class RequireProvisioningViewModel(
-        protected val app: Application,
-        protected val settingsManager: SettingsManager,
-        private val keyManager: KeyManager
+    protected val app: Application,
+    protected val settingsManager: SettingsManager,
+    private val keyManager: KeyManager
 ) : AndroidViewModel(app) {
 
     abstract val isRestoreOperation: Boolean
@@ -21,5 +21,9 @@ abstract class RequireProvisioningViewModel(
     internal fun validLocationIsSet() = StorageViewModel.validLocationIsSet(app, settingsManager)
 
     internal fun recoveryCodeIsSet() = keyManager.hasBackupKey()
+
+    open fun onStorageLocationChanged() {
+        // noop can be overwritten by sub-classes
+    }
 
 }

@@ -2,15 +2,14 @@
 
     <string name="app_name" translatable="false">Seedvault</string>
     <string name="backup">Backup</string>
+    <string name="data_management_label">Seedvault Backup</string>
+    <string name="current_destination_string">Backup status and settings</string>
 
     <string name="restore_backup_button">Restore backup</string>
 
     <!-- Settings -->
     <string name="settings_backup">Backup my data</string>
     <string name="settings_backup_location">Backup location</string>
-    <string name="settings_backup_location_picker">Choose backup location</string>
-    <string name="settings_backup_location_title">Backup location</string>
-    <string name="settings_backup_location_invalid">The chosen location can not be used.</string>
     <string name="settings_backup_location_none">None</string>
     <string name="settings_backup_location_internal">Internal storage</string>
     <string name="settings_backup_last_backup_never">Never</string>
@@ -25,7 +24,7 @@
     <string name="settings_backup_apk_dialog_message">Disabled app backup will still back up app data. However, it will not get restored automatically.\n\nYou will need to install all your apps manually while having \"Automatic Restore\" switched on.</string>
     <string name="settings_backup_apk_dialog_cancel">Cancel</string>
     <string name="settings_backup_apk_dialog_disable">Disable app backup</string>
-    <string name="settings_backup_status_title">App backup status</string>
+    <string name="settings_backup_status_title">Backup status</string>
     <string name="settings_backup_status_summary">Last backup: %1$s</string>
     <string name="settings_backup_exclude_apps">Exclude apps</string>
     <string name="settings_backup_now">Backup now</string>
@@ -40,6 +39,7 @@
     <string name="storage_fake_nextcloud_title" translatable="false">Nextcloud</string>
     <string name="storage_fake_nextcloud_summary">Click to install</string>
     <string name="storage_fake_nextcloud_summary_installed">Click to set up account</string>
+    <string name="storage_fake_nextcloud_summary_unavailable">Account not available. Set one up (or disable passcode).</string>
     <string name="storage_check_fragment_backup_title">Initializing backup location…</string>
     <string name="storage_check_fragment_restore_title">Looking for backups…</string>
     <string name="storage_check_fragment_backup_error">An error occurred while accessing the backup location.</string>
@@ -73,12 +73,10 @@
     <!-- Notification -->
     <string name="notification_channel_title">Backup notification</string>
     <string name="notification_title">Backup running</string>
-    <string name="notification_backup_result_complete">Backup complete</string>
-    <string name="notification_backup_result_rejected">Not backed up</string>
-    <string name="notification_backup_result_error">Backup failed</string>
+    <string name="notification_backup_already_running">Backup already in progress</string>
 
     <string name="notification_success_title">Backup finished</string>
-    <string name="notification_success_num_not_backed_up">%1$d apps could not get backed up</string>
+    <string name="notification_success_text">%1$d of %2$d apps backed up. Tap to learn more.</string>
     <string name="notification_failed_title">Backup failed</string>
 
     <string name="notification_error_channel_title">Error notification</string>
@@ -91,6 +89,26 @@
     <string name="notification_restore_error_text">Plug in your %1$s before installing the app to restore its data from backup.</string>
     <string name="notification_restore_error_action">Uninstall app</string>
 
+    <!-- App Backup and Restore State -->
+
+    <string name="backup_section_system">System Apps</string>
+    <string name="backup_sms">SMS text messages</string>
+    <string name="backup_settings">Device settings</string>
+    <string name="backup_call_log">Call history</string>
+    <string name="backup_contacts">Local contacts</string>
+    <string name="backup_section_user">Installed Apps</string>
+    <!-- This text gets shown for apps that the OS did not try to backup for whatever reason e.g. no backup was run yet -->
+    <string name="backup_app_not_yet_backed_up">Waiting to back up…</string>
+    <string name="restore_app_not_yet_backed_up">Was not yet backed up</string>
+    <string name="backup_app_was_stopped">Not backed up as it wasn\'t used recently</string>
+    <string name="restore_app_was_stopped">Was not backed up as it hadn\'t been used recently</string>
+    <string name="backup_app_no_data">App reported no data for backup</string>
+    <string name="restore_app_not_allowed">App didn\'t allow backup</string>
+    <string name="backup_app_quota_exceeded">Backup quota exceeded</string>
+    <string name="restore_app_quota_exceeded">Backup quota was exceeded</string>
+    <string name="restore_app_not_installed">App not installed</string>
+    <string name="backup_section_not_allowed">Apps that do not allow data backup</string>
+
     <!-- Restore -->
     <string name="restore_title">Restore from backup</string>
     <string name="restore_choose_restore_set">Choose a backup to restore</string>
@@ -101,13 +119,14 @@
     <string name="restore_set_error">An error occurred while loading the backups.</string>
     <string name="restore_set_empty_result">No suitable backups found at given location.\n\nThis is most likely due to a wrong recovery code or a storage error.</string>
     <string name="restore_installing_packages">Re-installing apps</string>
+    <string name="restore_installing_error_title">Some apps not installed</string>
+    <string name="restore_installing_error_message">Data can only be restored if an app is installed.\n\nTap failed apps to try to install them manually before proceeding.</string>
+    <string name="restore_installing_tap_to_install">Tap to install</string>
     <string name="restore_next">Next</string>
     <string name="restore_restoring">Restoring backup</string>
+    <string name="restore_restoring_error_title">Unable to restore some apps</string>
+    <string name="restore_restoring_error_message">You can re-install these apps manually and "Automatic restore" will attempt to restore their data (when enabled).</string>
     <string name="restore_magic_package">System package manager</string>
-    <string name="restore_app_no_data">App reported no data for backup</string>
-    <string name="restore_app_not_allowed">App doesn\'t allow backup</string>
-    <string name="restore_app_not_installed">App not installed</string>
-    <string name="restore_app_quota_exceeded">Backup quota exceeded</string>
     <string name="restore_finished_success">Restore complete</string>
     <string name="restore_finished_error">An error occurred while restoring the backup.</string>
     <string name="restore_finished_button">Finish</string>
@@ -119,6 +138,7 @@
     <!-- About -->
     <string name="about_title">About</string>
     <string name="about_summary">A backup application using Android\'s internal backup API.</string>
+    <string name="about_version">Version: %s</string>
     <string name="about_license">License: <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache2</a></string>
     <string name="about_author">Written by: <a href="https://github.com/stevesoltys">Steve Soltys</a> and <a href="https://blog.grobox.de">Torsten Grote</a></string>
     <string name="about_design">Design by: <a href="https://www.glennsorrentino.com/">Glenn Sorrentino</a></string>

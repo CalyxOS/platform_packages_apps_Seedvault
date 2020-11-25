@@ -1,21 +1,17 @@
 package com.stevesoltys.seedvault.settings
 
 import android.app.backup.IBackupManager
-import android.content.Context
-import android.content.Context.BACKUP_SERVICE
+import android.content.Context.BACKUP_SERVICE // ktlint-disable no-unused-imports
 import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED
-import android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED
 import android.os.Bundle
 import android.os.RemoteException
 import android.provider.Settings
-import android.provider.Settings.Secure.BACKUP_AUTO_RESTORE
+import android.provider.Settings.Secure.BACKUP_AUTO_RESTORE // ktlint-disable no-unused-imports
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.preference.Preference
@@ -23,8 +19,7 @@ import androidx.preference.Preference.OnPreferenceChangeListener
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.TwoStatePreference
 import com.stevesoltys.seedvault.R
-import com.stevesoltys.seedvault.UsbMonitor
-import com.stevesoltys.seedvault.isMassStorage
+import com.stevesoltys.seedvault.permitDiskReads
 import com.stevesoltys.seedvault.restore.RestoreActivity
 import com.stevesoltys.seedvault.ui.toRelativeTime
 import org.koin.android.ext.android.inject
@@ -48,21 +43,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private var menuRestore: MenuItem? = null
 
     private var storage: Storage? = null
-    private val usbFilter = IntentFilter(ACTION_USB_DEVICE_ATTACHED).apply {
-        addAction(ACTION_USB_DEVICE_DETACHED)
-    }
-    private val usbReceiver = object : UsbMonitor() {
-        override fun shouldMonitorStatus(context: Context, action: String, device: UsbDevice): Boolean {
-            return device.isMassStorage()
-        }
-
-        override fun onStatusChanged(context: Context, action: String, device: UsbDevice) {
-            setMenuItemStates()
-        }
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.settings, rootKey)
+        permitDiskReads {
+            setPreferencesFromResource(R.xml.settings, rootKey)
+        }
         setHasOptionsMenu(true)
 
         backup = findPreference("backup")!!
@@ -70,6 +55,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             val enabled = newValue as Boolean
             try {
                 backupManager.isBackupEnabled = enabled
+                if (enabled) viewModel.enableCallLogBackup()
                 return@OnPreferenceChangeListener true
             } catch (e: RemoteException) {
                 e.printStackTrace()
@@ -102,22 +88,28 @@ class SettingsFragment : PreferenceFragmentCompat() {
             val enable = newValue as Boolean
             if (enable) return@OnPreferenceChangeListener true
             AlertDialog.Builder(requireContext())
-                    .setIcon(R.drawable.ic_warning)
-                    .setTitle(R.string.settings_backup_apk_dialog_title)
-                    .setMessage(R.string.settings_backup_apk_dialog_message)
-                    .setPositiveButton(R.string.settings_backup_apk_dialog_cancel) { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton(R.string.settings_backup_apk_dialog_disable) { dialog, _ ->
-                        apkBackup.isChecked = enable
-                        dialog.dismiss()
-                    }
-                    .show()
+                .setIcon(R.drawable.ic_warning)
+                .setTitle(R.string.settings_backup_apk_dialog_title)
+                .setMessage(R.string.settings_backup_apk_dialog_message)
+                .setPositiveButton(R.string.settings_backup_apk_dialog_cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .setNegativeButton(R.string.settings_backup_apk_dialog_disable) { dialog, _ ->
+                    apkBackup.isChecked = enable
+                    dialog.dismiss()
+                }
+                .show()
             return@OnPreferenceChangeListener false
         }
         backupStatus = findPreference("backup_status")!!
+    }
 
-        viewModel.lastBackupTime.observe(this, Observer { time -> setAppBackupStatusSummary(time) })
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.lastBackupTime.observe(viewLifecycleOwner, Observer { time ->
+            setAppBackupStatusSummary(time)
+        })
     }
 
     override fun onStart() {
@@ -130,14 +122,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setBackupEnabledState()
         setBackupLocationSummary()
         setAutoRestoreState()
-        setMenuItemStates()
-
-        if (storage?.isUsb == true) context?.registerReceiver(usbReceiver, usbFilter)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (storage?.isUsb == true) context?.unregisterReceiver(usbReceiver)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -148,7 +132,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         if (resources.getBoolean(R.bool.show_restore_in_settings)) {
             menuRestore?.isVisible = true
         }
-        setMenuItemStates()
+        viewModel.backupPossible.observe(viewLifecycleOwner, Observer { possible ->
+            menuBackupNow?.isEnabled = possible
+            menuRestore?.isEnabled = possible
+        })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
@@ -161,7 +148,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
         R.id.action_about -> {
-            AboutDialogFragment().show(fragmentManager!!, AboutDialogFragment.TAG)
+            AboutDialogFragment().show(parentFragmentManager, AboutDialogFragment.TAG)
             true
         }
         else -> super.onOptionsItemSelected(item)
@@ -171,6 +158,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         try {
             backup.isChecked = backupManager.isBackupEnabled
             backup.isEnabled = true
+            // enable call log backups for existing installs (added end of 2020)
+            if (backup.isChecked) viewModel.enableCallLogBackup()
         } catch (e: RemoteException) {
             Log.e(TAG, "Error communicating with BackupManager", e)
             backup.isEnabled = false
@@ -184,7 +173,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val storage = this.storage
         if (storage?.isUsb == true) {
             autoRestore.summary = getString(R.string.settings_auto_restore_summary) + "\n\n" +
-                    getString(R.string.settings_auto_restore_summary_usb, storage.name)
+                getString(R.string.settings_auto_restore_summary_usb, storage.name)
         } else {
             autoRestore.setSummary(R.string.settings_auto_restore_summary)
         }
@@ -199,17 +188,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         // set time of last backup
         val lastBackup = lastBackupInMillis.toRelativeTime(requireContext())
         backupStatus.summary = getString(R.string.settings_backup_status_summary, lastBackup)
-    }
-
-    private fun setMenuItemStates() {
-        val context = context ?: return
-        if (menuBackupNow != null && menuRestore != null) {
-            val storage = this.storage
-            val enabled = storage != null &&
-                    (!storage.isUsb || storage.getDocumentFile(context).isDirectory)
-            menuBackupNow?.isEnabled = enabled
-            menuRestore?.isEnabled = enabled
-        }
     }
 
 }

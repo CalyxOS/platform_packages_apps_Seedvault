@@ -11,6 +11,7 @@ import android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED
 import android.hardware.usb.UsbManager.EXTRA_DEVICE
 import android.net.Uri
 import android.os.Handler
+import android.os.Looper
 import android.provider.DocumentsContract
 import android.util.Log
 import com.stevesoltys.seedvault.metadata.MetadataManager
@@ -18,16 +19,18 @@ import com.stevesoltys.seedvault.settings.FlashDrive
 import com.stevesoltys.seedvault.settings.SettingsManager
 import com.stevesoltys.seedvault.transport.requestBackup
 import com.stevesoltys.seedvault.ui.storage.AUTHORITY_STORAGE
-import org.koin.core.context.GlobalContext.get
+import org.koin.core.context.KoinContextHandler.get
 import java.util.concurrent.TimeUnit.HOURS
 
 private val TAG = UsbIntentReceiver::class.java.simpleName
 
+private const val HOURS_AUTO_BACKUP: Long = 24
+
 class UsbIntentReceiver : UsbMonitor() {
 
     // using KoinComponent would crash robolectric tests :(
-    private val settingsManager: SettingsManager by lazy { get().koin.get<SettingsManager>() }
-    private val metadataManager: MetadataManager by lazy { get().koin.get<MetadataManager>() }
+    private val settingsManager: SettingsManager by lazy { get().get<SettingsManager>() }
+    private val metadataManager: MetadataManager by lazy { get().get<MetadataManager>() }
 
     override fun shouldMonitorStatus(context: Context, action: String, device: UsbDevice): Boolean {
         if (action != ACTION_USB_DEVICE_ATTACHED) return false
@@ -36,7 +39,8 @@ class UsbIntentReceiver : UsbMonitor() {
         val attachedFlashDrive = FlashDrive.from(device)
         return if (savedFlashDrive == attachedFlashDrive) {
             Log.d(TAG, "Matches stored device, checking backup time...")
-            if (System.currentTimeMillis() - metadataManager.getLastBackupTime() >= HOURS.toMillis(24)) {
+            val backupMillis = System.currentTimeMillis() - metadataManager.getLastBackupTime()
+            if (backupMillis >= HOURS.toMillis(HOURS_AUTO_BACKUP)) {
                 Log.d(TAG, "Last backup older than 24 hours, requesting a backup...")
                 true
             } else {
@@ -65,7 +69,9 @@ abstract class UsbMonitor : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
-        if (intent.action == ACTION_USB_DEVICE_ATTACHED || intent.action == ACTION_USB_DEVICE_DETACHED) {
+        if (intent.action == ACTION_USB_DEVICE_ATTACHED ||
+            intent.action == ACTION_USB_DEVICE_DETACHED
+        ) {
             val device = intent.extras?.getParcelable<UsbDevice>(EXTRA_DEVICE) ?: return
             Log.d(TAG, "New USB mass-storage device attached.")
             device.log()
@@ -74,7 +80,8 @@ abstract class UsbMonitor : BroadcastReceiver() {
 
             val rootsUri = DocumentsContract.buildRootsUri(AUTHORITY_STORAGE)
             val contentResolver = context.contentResolver
-            val observer = object : ContentObserver(Handler()) {
+            val handler = Handler(Looper.getMainLooper())
+            val observer = object : ContentObserver(handler) {
                 override fun onChange(selfChange: Boolean, uri: Uri?) {
                     super.onChange(selfChange, uri)
                     onStatusChanged(context, action, device)
@@ -99,6 +106,7 @@ internal fun UsbDevice.isMassStorage(): Boolean {
 }
 
 private fun UsbInterface.isMassStorage(): Boolean {
+    @Suppress("MagicNumber")
     return interfaceClass == 8 && interfaceProtocol == 80 && interfaceSubclass == 6
 }
 

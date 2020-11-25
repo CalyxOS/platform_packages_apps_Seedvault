@@ -1,5 +1,6 @@
 package com.stevesoltys.seedvault.transport.backup
 
+import android.annotation.SuppressLint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.Signature
@@ -8,24 +9,27 @@ import android.util.Log
 import android.util.PackageUtils.computeSha256DigestBytes
 import com.stevesoltys.seedvault.MAGIC_PACKAGE_MANAGER
 import com.stevesoltys.seedvault.encodeBase64
+import com.stevesoltys.seedvault.metadata.ApkSplit
 import com.stevesoltys.seedvault.metadata.MetadataManager
 import com.stevesoltys.seedvault.metadata.PackageMetadata
 import com.stevesoltys.seedvault.metadata.PackageState
-import com.stevesoltys.seedvault.metadata.isSystemApp
-import com.stevesoltys.seedvault.metadata.isUpdatedSystemApp
 import com.stevesoltys.seedvault.settings.SettingsManager
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 import java.io.OutputStream
 import java.security.MessageDigest
 
 private val TAG = ApkBackup::class.java.simpleName
 
+@Suppress("BlockingMethodInNonBlockingContext")
 class ApkBackup(
-        private val pm: PackageManager,
-        private val settingsManager: SettingsManager,
-        private val metadataManager: MetadataManager) {
+    private val pm: PackageManager,
+    private val settingsManager: SettingsManager,
+    private val metadataManager: MetadataManager
+) {
 
     /**
      * Checks if a new APK needs to get backed up,
@@ -36,7 +40,12 @@ class ApkBackup(
      * @return new [PackageMetadata] if an APK backup was made or null if no backup was made.
      */
     @Throws(IOException::class)
-    fun backupApkIfNecessary(packageInfo: PackageInfo, packageState: PackageState, streamGetter: () -> OutputStream): PackageMetadata? {
+    @SuppressLint("NewApi") // can be removed when minSdk is set to 30
+    suspend fun backupApkIfNecessary(
+        packageInfo: PackageInfo,
+        packageState: PackageState,
+        streamGetter: suspend (suffix: String) -> OutputStream
+    ): PackageMetadata? {
         // do not back up @pm@
         val packageName = packageInfo.packageName
         if (packageName == MAGIC_PACKAGE_MANAGER) return null
@@ -44,8 +53,15 @@ class ApkBackup(
         // do not back up when setting is not enabled
         if (!settingsManager.backupApks()) return null
 
+        // do not back up test-only apps as we can't re-install them anyway
+        // see: https://commonsware.com/blog/2017/10/31/android-studio-3p0-flag-test-only.html
+        if (packageInfo.isTestOnly()) {
+            Log.d(TAG, "Package $packageName is test-only app. Not backing it up.")
+            return null
+        }
+
         // do not back up system apps that haven't been updated
-        if (packageInfo.isSystemApp() && !packageInfo.isUpdatedSystemApp()) {
+        if (packageInfo.isNotUpdatedSystemApp()) {
             Log.d(TAG, "Package $packageName is vanilla system app. Not backing it up.")
             return null
         }
@@ -65,21 +81,60 @@ class ApkBackup(
 
         // get cached metadata about package
         val packageMetadata = metadataManager.getPackageMetadata(packageName)
-                ?: PackageMetadata()
+            ?: PackageMetadata()
 
         // get version codes
         val version = packageInfo.longVersionCode
-        val backedUpVersion = packageMetadata.version ?: 0L  // no version will cause backup
+        val backedUpVersion = packageMetadata.version ?: 0L // no version will cause backup
 
         // do not backup if we have the version already and signatures did not change
         if (version <= backedUpVersion && !signaturesChanged(packageMetadata, signatures)) {
-            Log.d(TAG, "Package $packageName with version $version already has a backup ($backedUpVersion) with the same signature. Not backing it up.")
+            Log.d(
+                TAG, "Package $packageName with version $version" +
+                    " already has a backup ($backedUpVersion)" +
+                    " with the same signature. Not backing it up."
+            )
+            // We could also check if there are new feature module splits to back up,
+            // but we rely on the app themselves to re-download those, if needed after restore.
             return null
         }
 
         // get an InputStream for the APK
-        val apk = File(packageInfo.applicationInfo.sourceDir)
-        val inputStream = try {
+        val inputStream = getApkInputStream(packageInfo.applicationInfo.sourceDir)
+        // copy the APK to the storage's output and calculate SHA-256 hash while at it
+        val sha256 = copyStreamsAndGetHash(inputStream, streamGetter(""))
+
+        // back up splits if they exist
+        val splits =
+            if (packageInfo.splitNames == null) null else backupSplitApks(packageInfo, streamGetter)
+
+        Log.d(TAG, "Backed up new APK of $packageName with version $version.")
+
+        // return updated metadata
+        return PackageMetadata(
+            state = packageState,
+            version = version,
+            installer = pm.getInstallSourceInfo(packageName).installingPackageName,
+            splits = splits,
+            sha256 = sha256,
+            signatures = signatures
+        )
+    }
+
+    private fun signaturesChanged(
+        packageMetadata: PackageMetadata,
+        signatures: List<String>
+    ): Boolean {
+        // no signatures in package metadata counts as them not having changed
+        if (packageMetadata.signatures == null) return false
+        // TODO to support multiple signers check if lists differ
+        return packageMetadata.signatures.intersect(signatures).isEmpty()
+    }
+
+    @Throws(IOException::class)
+    private fun getApkInputStream(apkPath: String): FileInputStream {
+        val apk = File(apkPath)
+        return try {
             apk.inputStream()
         } catch (e: FileNotFoundException) {
             Log.e(TAG, "Error opening ${apk.absolutePath} for backup.", e)
@@ -88,40 +143,83 @@ class ApkBackup(
             Log.e(TAG, "Error opening ${apk.absolutePath} for backup.", e)
             throw IOException(e)
         }
+    }
 
-        // copy the APK to the storage's output and calculate SHA-256 hash while at it
+    @Throws(IOException::class)
+    private suspend fun backupSplitApks(
+        packageInfo: PackageInfo,
+        streamGetter: suspend (suffix: String) -> OutputStream
+    ): List<ApkSplit> {
+        check(packageInfo.splitNames != null)
+        val splitSourceDirs = packageInfo.applicationInfo.splitSourceDirs
+        check(packageInfo.splitNames.size == splitSourceDirs.size) {
+            "Size Mismatch! ${packageInfo.splitNames.size} != ${splitSourceDirs.size} " +
+                "splitNames is ${packageInfo.splitNames.toList()}, " +
+                "but splitSourceDirs is ${splitSourceDirs.toList()}"
+        }
+        val splits = ArrayList<ApkSplit>(packageInfo.splitNames.size)
+        for (i in packageInfo.splitNames.indices) {
+            val split = backupSplitApk(packageInfo.splitNames[i], splitSourceDirs[i], streamGetter)
+            splits.add(split)
+        }
+        return splits
+    }
+
+    @Throws(IOException::class)
+    private suspend fun backupSplitApk(
+        name: String,
+        sourceDir: String,
+        streamGetter: suspend (suffix: String) -> OutputStream
+    ): ApkSplit {
+        // Calculate sha256 hash first to determine file name suffix.
+        // We could also just use the split name as a suffix, but there is a theoretical risk
+        // that we exceed the maximum file name length, so we use the hash instead.
+        // The downside is that we need to read the file two times.
         val messageDigest = MessageDigest.getInstance("SHA-256")
-        streamGetter.invoke().use { outputStream ->
-            inputStream.use { inputStream ->
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                var bytes = inputStream.read(buffer)
-                while (bytes >= 0) {
-                    outputStream.write(buffer, 0, bytes)
-                    messageDigest.update(buffer, 0, bytes)
-                    bytes = inputStream.read(buffer)
-                }
+        getApkInputStream(sourceDir).use { inputStream ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            var bytes = inputStream.read(buffer)
+            while (bytes >= 0) {
+                messageDigest.update(buffer, 0, bytes)
+                bytes = inputStream.read(buffer)
             }
         }
         val sha256 = messageDigest.digest().encodeBase64()
-        Log.d(TAG, "Backed up new APK of $packageName with version $version.")
-
-        // return updated metadata
-        return PackageMetadata(
-                state = packageState,
-                version = version,
-                installer = pm.getInstallerPackageName(packageName),
-                sha256 = sha256,
-                signatures = signatures
-        )
+        val suffix = "_$sha256"
+        // copy the split APK to the storage stream
+        getApkInputStream(sourceDir).use { inputStream ->
+            streamGetter(suffix).use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        return ApkSplit(name, sha256)
     }
 
-    private fun signaturesChanged(packageMetadata: PackageMetadata, signatures: List<String>): Boolean {
-        // no signatures in package metadata counts as them not having changed
-        if (packageMetadata.signatures == null) return false
-        // TODO to support multiple signers check if lists differ
-        return packageMetadata.signatures.intersect(signatures).isEmpty()
-    }
+}
 
+/**
+ * Copy the APK from the given [InputStream] to the given [OutputStream]
+ * and calculate the SHA-256 hash while at it.
+ *
+ * Both streams will be closed when the method returns.
+ *
+ * @return the APK's SHA-256 hash in Base64 format.
+ */
+@Throws(IOException::class)
+fun copyStreamsAndGetHash(inputStream: InputStream, outputStream: OutputStream): String {
+    val messageDigest = MessageDigest.getInstance("SHA-256")
+    outputStream.use { oStream ->
+        inputStream.use { inputStream ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            var bytes = inputStream.read(buffer)
+            while (bytes >= 0) {
+                oStream.write(buffer, 0, bytes)
+                messageDigest.update(buffer, 0, bytes)
+                bytes = inputStream.read(buffer)
+            }
+        }
+    }
+    return messageDigest.digest().encodeBase64()
 }
 
 /**

@@ -5,7 +5,6 @@ import android.app.backup.IBackupManager
 import android.app.backup.IRestoreObserver
 import android.app.backup.IRestoreSession
 import android.app.backup.RestoreSet
-import android.content.pm.PackageManager
 import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
@@ -19,38 +18,43 @@ import com.stevesoltys.seedvault.BackupMonitor
 import com.stevesoltys.seedvault.MAGIC_PACKAGE_MANAGER
 import com.stevesoltys.seedvault.R
 import com.stevesoltys.seedvault.crypto.KeyManager
-import com.stevesoltys.seedvault.getAppName
+import com.stevesoltys.seedvault.metadata.BackupMetadata
 import com.stevesoltys.seedvault.metadata.PackageState.APK_AND_DATA
 import com.stevesoltys.seedvault.metadata.PackageState.NOT_ALLOWED
 import com.stevesoltys.seedvault.metadata.PackageState.NO_DATA
 import com.stevesoltys.seedvault.metadata.PackageState.QUOTA_EXCEEDED
 import com.stevesoltys.seedvault.metadata.PackageState.UNKNOWN_ERROR
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_NOT_ALLOWED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_NOT_INSTALLED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_NO_DATA
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_QUOTA_EXCEEDED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.IN_PROGRESS
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.SUCCEEDED
+import com.stevesoltys.seedvault.metadata.PackageState.WAS_STOPPED
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_APPS
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_BACKUP
+import com.stevesoltys.seedvault.restore.install.ApkRestore
+import com.stevesoltys.seedvault.restore.install.InstallIntentCreator
+import com.stevesoltys.seedvault.restore.install.InstallResult
+import com.stevesoltys.seedvault.restore.install.isInstalled
 import com.stevesoltys.seedvault.settings.SettingsManager
 import com.stevesoltys.seedvault.transport.TRANSPORT_ID
-import com.stevesoltys.seedvault.transport.restore.ApkRestore
-import com.stevesoltys.seedvault.transport.restore.InstallResult
 import com.stevesoltys.seedvault.transport.restore.RestoreCoordinator
+import com.stevesoltys.seedvault.ui.AppBackupState
+import com.stevesoltys.seedvault.ui.AppBackupState.FAILED
+import com.stevesoltys.seedvault.ui.AppBackupState.FAILED_NOT_ALLOWED
+import com.stevesoltys.seedvault.ui.AppBackupState.FAILED_NOT_INSTALLED
+import com.stevesoltys.seedvault.ui.AppBackupState.FAILED_NO_DATA
+import com.stevesoltys.seedvault.ui.AppBackupState.FAILED_QUOTA_EXCEEDED
+import com.stevesoltys.seedvault.ui.AppBackupState.IN_PROGRESS
+import com.stevesoltys.seedvault.ui.AppBackupState.NOT_YET_BACKED_UP
+import com.stevesoltys.seedvault.ui.AppBackupState.SUCCEEDED
 import com.stevesoltys.seedvault.ui.LiveEvent
 import com.stevesoltys.seedvault.ui.MutableLiveEvent
 import com.stevesoltys.seedvault.ui.RequireProvisioningViewModel
+import com.stevesoltys.seedvault.ui.notification.getAppName
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.LinkedList
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -58,13 +62,13 @@ import kotlin.coroutines.suspendCoroutine
 private val TAG = RestoreViewModel::class.java.simpleName
 
 internal class RestoreViewModel(
-        app: Application,
-        settingsManager: SettingsManager,
-        keyManager: KeyManager,
-        private val backupManager: IBackupManager,
-        private val restoreCoordinator: RestoreCoordinator,
-        private val apkRestore: ApkRestore,
-        private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    app: Application,
+    settingsManager: SettingsManager,
+    keyManager: KeyManager,
+    private val backupManager: IBackupManager,
+    private val restoreCoordinator: RestoreCoordinator,
+    private val apkRestore: ApkRestore,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : RequireProvisioningViewModel(app, settingsManager, keyManager), RestorableBackupClickListener {
 
     override val isRestoreOperation = true
@@ -81,17 +85,24 @@ internal class RestoreViewModel(
     private val mChosenRestorableBackup = MutableLiveData<RestorableBackup>()
     internal val chosenRestorableBackup: LiveData<RestorableBackup> get() = mChosenRestorableBackup
 
-    internal val installResult: LiveData<InstallResult> = switchMap(mChosenRestorableBackup) { backup ->
-        @Suppress("EXPERIMENTAL_API_USAGE")
-        getInstallResult(backup)
-    }
+    internal val installResult: LiveData<InstallResult> =
+        switchMap(mChosenRestorableBackup) { backup ->
+            getInstallResult(backup)
+        }
+    internal val installIntentCreator by lazy { InstallIntentCreator(app.packageManager) }
 
     private val mNextButtonEnabled = MutableLiveData<Boolean>().apply { value = false }
     internal val nextButtonEnabled: LiveData<Boolean> = mNextButtonEnabled
 
     private val mRestoreProgress = MutableLiveData<LinkedList<AppRestoreResult>>().apply {
         value = LinkedList<AppRestoreResult>().apply {
-            add(AppRestoreResult(MAGIC_PACKAGE_MANAGER, getAppName(app, MAGIC_PACKAGE_MANAGER), IN_PROGRESS))
+            add(
+                AppRestoreResult(
+                    packageName = MAGIC_PACKAGE_MANAGER,
+                    name = getAppName(app, MAGIC_PACKAGE_MANAGER),
+                    state = IN_PROGRESS
+                )
+            )
         }
     }
     internal val restoreProgress: LiveData<LinkedList<AppRestoreResult>> get() = mRestoreProgress
@@ -102,8 +113,8 @@ internal class RestoreViewModel(
     @Throws(RemoteException::class)
     private fun getOrStartSession(): IRestoreSession {
         val session = this.session
-                ?: backupManager.beginRestoreSessionForUser(UserHandle.myUserId(), null, TRANSPORT_ID)
-                ?: throw RemoteException("beginRestoreSessionForUser returned null")
+            ?: backupManager.beginRestoreSessionForUser(UserHandle.myUserId(), null, TRANSPORT_ID)
+            ?: throw RemoteException("beginRestoreSessionForUser returned null")
         this.session = session
         return session
     }
@@ -112,23 +123,24 @@ internal class RestoreViewModel(
         mRestoreSetResults.value = getAvailableRestoreSets()
     }
 
-    private suspend fun getAvailableRestoreSets() = suspendCoroutine<RestoreSetResult> { continuation ->
-        val session = try {
-            getOrStartSession()
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Error starting new session", e)
-            continuation.resume(RestoreSetResult(app.getString(R.string.restore_set_error)))
-            return@suspendCoroutine
-        }
+    private suspend fun getAvailableRestoreSets() =
+        suspendCoroutine<RestoreSetResult> { continuation ->
+            val session = try {
+                getOrStartSession()
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Error starting new session", e)
+                continuation.resume(RestoreSetResult(app.getString(R.string.restore_set_error)))
+                return@suspendCoroutine
+            }
 
-        val observer = RestoreObserver(continuation)
-        val setResult = session.getAvailableRestoreSets(observer, monitor)
-        if (setResult != 0) {
-            Log.e(TAG, "getAvailableRestoreSets() returned non-zero value")
-            continuation.resume(RestoreSetResult(app.getString(R.string.restore_set_error)))
-            return@suspendCoroutine
+            val observer = RestoreObserver(continuation)
+            val setResult = session.getAvailableRestoreSets(observer, monitor)
+            if (setResult != 0) {
+                Log.e(TAG, "getAvailableRestoreSets() returned non-zero value")
+                continuation.resume(RestoreSetResult(app.getString(R.string.restore_set_error)))
+                return@suspendCoroutine
+            }
         }
-    }
 
     override fun onRestorableBackupClicked(restorableBackup: RestorableBackup) {
         mChosenRestorableBackup.value = restorableBackup
@@ -139,19 +151,21 @@ internal class RestoreViewModel(
         closeSession()
     }
 
-    @ExperimentalCoroutinesApi
-    private fun getInstallResult(restorableBackup: RestorableBackup): LiveData<InstallResult> {
-        return apkRestore.restore(restorableBackup.token, restorableBackup.packageMetadataMap)
-                .onStart {
-                    Log.d(TAG, "Start InstallResult Flow")
-                }.catch { e ->
-                    Log.d(TAG, "Exception in InstallResult Flow", e)
-                }.onCompletion { e ->
-                    Log.d(TAG, "Completed InstallResult Flow", e)
-                    mNextButtonEnabled.postValue(true)
-                }
-                .flowOn(ioDispatcher)
-                .asLiveData()
+    private fun getInstallResult(backup: RestorableBackup): LiveData<InstallResult> {
+        @Suppress("EXPERIMENTAL_API_USAGE")
+        return apkRestore.restore(backup.token, backup.deviceName, backup.packageMetadataMap)
+            .onStart {
+                Log.d(TAG, "Start InstallResult Flow")
+            }.catch { e ->
+                Log.d(TAG, "Exception in InstallResult Flow", e)
+            }.onCompletion { e ->
+                Log.d(TAG, "Completed InstallResult Flow", e)
+                mNextButtonEnabled.postValue(true)
+            }
+            .flowOn(ioDispatcher)
+            // collect on the same thread, so concurrency issues don't mess up live data updates
+            // e.g. InstallResult#isFinished isn't reported too early.
+            .asLiveData(ioDispatcher)
     }
 
     internal fun onNextClicked() {
@@ -166,10 +180,18 @@ internal class RestoreViewModel(
     private suspend fun startRestore(token: Long) {
         Log.d(TAG, "Starting new restore session to restore backup $token")
 
+        // if we had no token before (i.e. restore from setup wizard),
+        // use the token of the current restore set from now on
+        if (settingsManager.getToken() == null) {
+            settingsManager.setNewToken(token)
+        }
+
         // we need to start a new session and retrieve the restore sets before starting the restore
         val restoreSetResult = getAvailableRestoreSets()
         if (restoreSetResult.hasError()) {
-            mRestoreBackupResult.postValue(RestoreBackupResult(app.getString(R.string.restore_finished_error)))
+            mRestoreBackupResult.postValue(
+                RestoreBackupResult(app.getString(R.string.restore_finished_error))
+            )
             return
         }
 
@@ -179,7 +201,9 @@ internal class RestoreViewModel(
         if (restoreAllResult != 0) {
             if (session == null) Log.e(TAG, "session was null")
             else Log.e(TAG, "restoreAll() returned non-zero value")
-            mRestoreBackupResult.postValue(RestoreBackupResult(app.getString(R.string.restore_finished_error)))
+            mRestoreBackupResult.postValue(
+                RestoreBackupResult(app.getString(R.string.restore_finished_error))
+            )
             return
         }
     }
@@ -201,27 +225,26 @@ internal class RestoreViewModel(
     private fun updateLatestPackage(list: LinkedList<AppRestoreResult>) {
         val latestResult = list[0]
         if (restoreCoordinator.isFailedPackage(latestResult.packageName)) {
-            list[0] = latestResult.copy(status = getFailedStatus(latestResult.packageName))
+            list[0] = latestResult.copy(state = getFailedStatus(latestResult.packageName))
         } else {
-            list[0] = latestResult.copy(status = SUCCEEDED)
+            list[0] = latestResult.copy(state = SUCCEEDED)
         }
     }
 
     @WorkerThread
-    private fun getFailedStatus(packageName: String, restorableBackup: RestorableBackup = chosenRestorableBackup.value!!): AppRestoreStatus {
+    private fun getFailedStatus(
+        packageName: String,
+        restorableBackup: RestorableBackup = chosenRestorableBackup.value!!
+    ): AppBackupState {
         val metadata = restorableBackup.packageMetadataMap[packageName] ?: return FAILED
         return when (metadata.state) {
             NO_DATA -> FAILED_NO_DATA
+            WAS_STOPPED -> NOT_YET_BACKED_UP
             NOT_ALLOWED -> FAILED_NOT_ALLOWED
             QUOTA_EXCEEDED -> FAILED_QUOTA_EXCEEDED
             UNKNOWN_ERROR -> FAILED
             APK_AND_DATA -> {
-                try {
-                    app.packageManager.getPackageInfo(packageName, 0)
-                    FAILED
-                } catch (e: PackageManager.NameNotFoundException) {
-                    FAILED_NOT_INSTALLED
-                }
+                if (app.packageManager.isInstalled(packageName)) FAILED else FAILED_NOT_INSTALLED
             }
         }
     }
@@ -258,7 +281,9 @@ internal class RestoreViewModel(
     }
 
     @WorkerThread
-    private inner class RestoreObserver(private val continuation: Continuation<RestoreSetResult>? = null) : IRestoreObserver.Stub() {
+    private inner class RestoreObserver(
+        private val continuation: Continuation<RestoreSetResult>? = null
+    ) : IRestoreObserver.Stub() {
 
         /**
          * Supply a list of the restore datasets available from the current transport.
@@ -281,31 +306,35 @@ internal class RestoreViewModel(
                     RestoreSetResult(app.getString(R.string.restore_set_error))
                 } else {
                     val restorableBackups = restoreSets.mapNotNull { set ->
-                        val metadata = backupMetadata[set.token]
-                        when {
-                            metadata == null -> {
-                                Log.e(TAG, "RestoreCoordinator#getAndClearBackupMetadata() has no metadata for token ${set.token}.")
-                                null
-                            }
-                            metadata.time == 0L -> {
-                                Log.d(TAG, "Ignoring RestoreSet with no last backup time: ${set.token}.")
-                                null
-                            }
-                            else -> {
-                                RestorableBackup(set, metadata)
-                            }
-                        }
+                        getRestorableBackup(set, backupMetadata[set.token])
                     }
-                    RestoreSetResult(restorableBackups)
+                    if (restorableBackups.isEmpty()) {
+                        RestoreSetResult(app.getString(R.string.restore_set_empty_result))
+                    } else RestoreSetResult(restorableBackups)
                 }
             }
             continuation.resume(result)
         }
 
+        private fun getRestorableBackup(set: RestoreSet, metadata: BackupMetadata?) = when {
+            metadata == null -> {
+                Log.e(TAG, "No metadata for token ${set.token}.")
+                null
+            }
+            metadata.time == 0L -> {
+                Log.d(TAG, "Ignoring RestoreSet with no last backup time: ${set.token}.")
+                null
+            }
+            else -> {
+                RestorableBackup(set, metadata)
+            }
+        }
+
         /**
          * The restore operation has begun.
          *
-         * @param numPackages The total number of packages being processed in this restore operation.
+         * @param numPackages The total number of packages
+         * being processed in this restore operation.
          */
         override fun restoreStarting(numPackages: Int) {
             // noop
@@ -333,8 +362,8 @@ internal class RestoreViewModel(
          */
         override fun restoreFinished(result: Int) {
             val restoreResult = RestoreBackupResult(
-                    if (result == 0) null
-                    else app.getString(R.string.restore_finished_error)
+                if (result == 0) null
+                else app.getString(R.string.restore_finished_error)
             )
             onRestoreComplete(restoreResult)
             closeSession()
@@ -345,8 +374,9 @@ internal class RestoreViewModel(
 }
 
 internal class RestoreSetResult(
-        internal val restorableBackups: List<RestorableBackup>,
-        internal val errorMsg: String?) {
+    internal val restorableBackups: List<RestorableBackup>,
+    internal val errorMsg: String?
+) {
 
     internal constructor(restorableBackups: List<RestorableBackup>) : this(restorableBackups, null)
 

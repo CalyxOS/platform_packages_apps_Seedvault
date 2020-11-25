@@ -12,17 +12,11 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.stevesoltys.seedvault.R
-import com.stevesoltys.seedvault.restore.AppRestoreStatus
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_NOT_ALLOWED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_NOT_INSTALLED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_NO_DATA
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.FAILED_QUOTA_EXCEEDED
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.IN_PROGRESS
-import com.stevesoltys.seedvault.restore.AppRestoreStatus.SUCCEEDED
+import com.stevesoltys.seedvault.ui.AppBackupState.FAILED
+import com.stevesoltys.seedvault.ui.AppBackupState.IN_PROGRESS
+import com.stevesoltys.seedvault.ui.AppBackupState.SUCCEEDED
 
-
-internal open class AppViewHolder(protected val v: View) : RecyclerView.ViewHolder(v) {
+internal abstract class AppViewHolder(protected val v: View) : RecyclerView.ViewHolder(v) {
 
     protected val context: Context = v.context
     protected val pm: PackageManager = context.packageManager
@@ -40,9 +34,8 @@ internal open class AppViewHolder(protected val v: View) : RecyclerView.ViewHold
         v.background = null
     }
 
-    protected fun setStatus(status: AppRestoreStatus) {
-        v.background = null
-        if (status == IN_PROGRESS) {
+    protected fun setState(state: AppBackupState, isRestore: Boolean) {
+        if (state == IN_PROGRESS) {
             appInfo.visibility = GONE
             appStatus.visibility = INVISIBLE
             progressBar.visibility = VISIBLE
@@ -50,24 +43,18 @@ internal open class AppViewHolder(protected val v: View) : RecyclerView.ViewHold
             appStatus.visibility = VISIBLE
             progressBar.visibility = INVISIBLE
             appInfo.visibility = GONE
-            when (status) {
+            when (state) {
                 SUCCEEDED -> appStatus.setImageResource(R.drawable.ic_check_green)
                 FAILED -> appStatus.setImageResource(R.drawable.ic_error_red)
                 else -> {
                     appStatus.setImageResource(R.drawable.ic_warning_yellow)
-                    appInfo.text = status.getInfo()
+                    appInfo.text =
+                        if (isRestore) state.getRestoreText(context)
+                        else state.getBackupText(context)
                     appInfo.visibility = VISIBLE
                 }
             }
         }
-    }
-
-    private fun AppRestoreStatus.getInfo(): String = when (this) {
-        FAILED_NO_DATA -> context.getString(R.string.restore_app_no_data)
-        FAILED_NOT_ALLOWED -> context.getString(R.string.restore_app_not_allowed)
-        FAILED_NOT_INSTALLED -> context.getString(R.string.restore_app_not_installed)
-        FAILED_QUOTA_EXCEEDED -> context.getString(R.string.restore_app_quota_exceeded)
-        else -> "Please report a bug after you read this."
     }
 
 }

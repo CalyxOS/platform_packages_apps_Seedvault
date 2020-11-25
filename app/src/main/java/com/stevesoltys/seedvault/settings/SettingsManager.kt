@@ -2,17 +2,26 @@ package com.stevesoltys.seedvault.settings
 
 import android.content.Context
 import android.hardware.usb.UsbDevice
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
-import java.util.concurrent.atomic.AtomicBoolean
+import com.stevesoltys.seedvault.MAGIC_PACKAGE_MANAGER
+import com.stevesoltys.seedvault.permitDiskReads
+import com.stevesoltys.seedvault.transport.backup.BackupCoordinator
+import java.util.concurrent.ConcurrentSkipListSet
 
+internal const val PREF_KEY_TOKEN = "token"
 internal const val PREF_KEY_BACKUP_APK = "backup_apk"
+internal const val PREF_KEY_REDO_PM = "redoPm"
 
 private const val PREF_KEY_STORAGE_URI = "storageUri"
 private const val PREF_KEY_STORAGE_NAME = "storageName"
 private const val PREF_KEY_STORAGE_IS_USB = "storageIsUsb"
+private const val PREF_KEY_STORAGE_REQUIRES_NETWORK = "storageRequiresNetwork"
 
 private const val PREF_KEY_FLASH_DRIVE_NAME = "flashDriveName"
 private const val PREF_KEY_FLASH_DRIVE_SERIAL_NUMBER = "flashSerialNumber"
@@ -21,53 +30,74 @@ private const val PREF_KEY_FLASH_DRIVE_PRODUCT_ID = "flashDriveProductId"
 
 private const val PREF_KEY_BACKUP_APP_BLACKLIST = "backupAppBlacklist"
 
-class SettingsManager(context: Context) {
+class SettingsManager(private val context: Context) {
 
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    private val prefs = permitDiskReads {
+        PreferenceManager.getDefaultSharedPreferences(context)
+    }
 
-    private var isStorageChanging: AtomicBoolean = AtomicBoolean(false)
+    @Volatile
+    private var token: Long? = null
 
-    private val blacklistedApps: HashSet<String> by lazy {
-        prefs.getStringSet(PREF_KEY_BACKUP_APP_BLACKLIST, emptySet()).toHashSet()
+    /**
+     * This gets accessed by non-UI threads when saving with [PreferenceManager]
+     * and when [isBackupEnabled] is called during a backup run.
+     * Therefore, it is implemented with a thread-safe [ConcurrentSkipListSet].
+     */
+    private val blacklistedApps: MutableSet<String> by lazy {
+        ConcurrentSkipListSet(prefs.getStringSet(PREF_KEY_BACKUP_APP_BLACKLIST, emptySet()))
+    }
+
+    fun getToken(): Long? = token ?: {
+        val value = prefs.getLong(PREF_KEY_TOKEN, 0L)
+        if (value == 0L) null else value
+    }()
+
+    /**
+     * Sets a new RestoreSet token.
+     * Should only be called by the [BackupCoordinator]
+     * to ensure that related work is performed after moving to a new token.
+     */
+    fun setNewToken(newToken: Long) {
+        prefs.edit().putLong(PREF_KEY_TOKEN, newToken).apply()
+        token = newToken
     }
 
     // FIXME Storage is currently plugin specific and not generic
     fun setStorage(storage: Storage) {
         prefs.edit()
-                .putString(PREF_KEY_STORAGE_URI, storage.uri.toString())
-                .putString(PREF_KEY_STORAGE_NAME, storage.name)
-                .putBoolean(PREF_KEY_STORAGE_IS_USB, storage.isUsb)
-                .apply()
-        isStorageChanging.set(true)
+            .putString(PREF_KEY_STORAGE_URI, storage.uri.toString())
+            .putString(PREF_KEY_STORAGE_NAME, storage.name)
+            .putBoolean(PREF_KEY_STORAGE_IS_USB, storage.isUsb)
+            .putBoolean(PREF_KEY_STORAGE_REQUIRES_NETWORK, storage.requiresNetwork)
+            .apply()
     }
 
     fun getStorage(): Storage? {
         val uriStr = prefs.getString(PREF_KEY_STORAGE_URI, null) ?: return null
         val uri = Uri.parse(uriStr)
-        val name = prefs.getString(PREF_KEY_STORAGE_NAME, null) ?: throw IllegalStateException("no storage name")
+        val name = prefs.getString(PREF_KEY_STORAGE_NAME, null)
+            ?: throw IllegalStateException("no storage name")
         val isUsb = prefs.getBoolean(PREF_KEY_STORAGE_IS_USB, false)
-        return Storage(uri, name, isUsb)
-    }
-
-    fun getAndResetIsStorageChanging(): Boolean {
-        return isStorageChanging.getAndSet(false)
+        val requiresNetwork = prefs.getBoolean(PREF_KEY_STORAGE_REQUIRES_NETWORK, false)
+        return Storage(uri, name, isUsb, requiresNetwork)
     }
 
     fun setFlashDrive(usb: FlashDrive?) {
         if (usb == null) {
             prefs.edit()
-                    .remove(PREF_KEY_FLASH_DRIVE_NAME)
-                    .remove(PREF_KEY_FLASH_DRIVE_SERIAL_NUMBER)
-                    .remove(PREF_KEY_FLASH_DRIVE_VENDOR_ID)
-                    .remove(PREF_KEY_FLASH_DRIVE_PRODUCT_ID)
-                    .apply()
+                .remove(PREF_KEY_FLASH_DRIVE_NAME)
+                .remove(PREF_KEY_FLASH_DRIVE_SERIAL_NUMBER)
+                .remove(PREF_KEY_FLASH_DRIVE_VENDOR_ID)
+                .remove(PREF_KEY_FLASH_DRIVE_PRODUCT_ID)
+                .apply()
         } else {
             prefs.edit()
-                    .putString(PREF_KEY_FLASH_DRIVE_NAME, usb.name)
-                    .putString(PREF_KEY_FLASH_DRIVE_SERIAL_NUMBER, usb.serialNumber)
-                    .putInt(PREF_KEY_FLASH_DRIVE_VENDOR_ID, usb.vendorId)
-                    .putInt(PREF_KEY_FLASH_DRIVE_PRODUCT_ID, usb.productId)
-                    .apply()
+                .putString(PREF_KEY_FLASH_DRIVE_NAME, usb.name)
+                .putString(PREF_KEY_FLASH_DRIVE_SERIAL_NUMBER, usb.serialNumber)
+                .putInt(PREF_KEY_FLASH_DRIVE_VENDOR_ID, usb.vendorId)
+                .putInt(PREF_KEY_FLASH_DRIVE_PRODUCT_ID, usb.productId)
+                .apply()
         }
     }
 
@@ -78,6 +108,29 @@ class SettingsManager(context: Context) {
         val productId = prefs.getInt(PREF_KEY_FLASH_DRIVE_PRODUCT_ID, -1)
         return FlashDrive(name, serialNumber, vendorId, productId)
     }
+
+    /**
+     * Check if we are able to do backups now by examining possible pre-conditions
+     * such as plugged-in flash drive or internet access.
+     *
+     * Should be run off the UI thread (ideally I/O) because of disk access.
+     *
+     * @return true if a backup is possible, false if not.
+     */
+    @WorkerThread
+    fun canDoBackupNow(): Boolean {
+        val storage = getStorage() ?: return false
+        return !storage.isUnavailableUsb(context) && !storage.isUnavailableNetwork(context)
+    }
+
+    /**
+     * Set this to true if the next backup run for [MAGIC_PACKAGE_MANAGER]
+     * needs to be non-incremental,
+     * because we need to fake an OK backup now even though we can't do one right now.
+     */
+    var pmBackupNextTimeNonIncremental: Boolean
+        get() = prefs.getBoolean(PREF_KEY_REDO_PM, false)
+        set(value) = prefs.edit().putBoolean(PREF_KEY_REDO_PM, value).apply()
 
     fun backupApks(): Boolean {
         return prefs.getBoolean(PREF_KEY_BACKUP_APK, true)
@@ -95,24 +148,51 @@ class SettingsManager(context: Context) {
 }
 
 data class Storage(
-        val uri: Uri,
-        val name: String,
-        val isUsb: Boolean) {
+    val uri: Uri,
+    val name: String,
+    val isUsb: Boolean,
+    val requiresNetwork: Boolean
+) {
     fun getDocumentFile(context: Context) = DocumentFile.fromTreeUri(context, uri)
-            ?: throw AssertionError("Should only happen on API < 21.")
+        ?: throw AssertionError("Should only happen on API < 21.")
+
+    /**
+     * Returns true if this is USB storage that is not available, false otherwise.
+     *
+     * Must be run off UI thread (ideally I/O).
+     */
+    @WorkerThread
+    fun isUnavailableUsb(context: Context): Boolean {
+        return isUsb && !getDocumentFile(context).isDirectory
+    }
+
+    /**
+     * Returns true if this is storage that requires network access,
+     * but it isn't available right now.
+     */
+    fun isUnavailableNetwork(context: Context): Boolean {
+        return requiresNetwork && !hasInternet(context)
+    }
+
+    private fun hasInternet(context: Context): Boolean {
+        val cm = context.getSystemService(ConnectivityManager::class.java)
+        val capabilities = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
 }
 
 data class FlashDrive(
-        val name: String,
-        val serialNumber: String?,
-        val vendorId: Int,
-        val productId: Int) {
+    val name: String,
+    val serialNumber: String?,
+    val vendorId: Int,
+    val productId: Int
+) {
     companion object {
         fun from(device: UsbDevice) = FlashDrive(
-                name = "${device.manufacturerName} ${device.productName}",
-                serialNumber = device.serialNumber,
-                vendorId = device.vendorId,
-                productId = device.productId
+            name = "${device.manufacturerName} ${device.productName}",
+            serialNumber = device.serialNumber,
+            vendorId = device.vendorId,
+            productId = device.productId
         )
     }
 }

@@ -4,8 +4,10 @@ import android.app.backup.RestoreSet
 import com.stevesoltys.seedvault.metadata.BackupMetadata
 import com.stevesoltys.seedvault.metadata.PackageMetadataMap
 
-data class RestorableBackup(private val restoreSet: RestoreSet,
-                            private val backupMetadata: BackupMetadata) {
+data class RestorableBackup(
+    private val restoreSet: RestoreSet,
+    private val backupMetadata: BackupMetadata
+) {
 
     val name: String
         get() = restoreSet.name
@@ -15,6 +17,9 @@ data class RestorableBackup(private val restoreSet: RestoreSet,
 
     val time: Long
         get() = backupMetadata.time
+
+    val deviceName: String
+        get() = backupMetadata.deviceName
 
     val packageMetadataMap: PackageMetadataMap
         get() = backupMetadata.packageMetadataMap
