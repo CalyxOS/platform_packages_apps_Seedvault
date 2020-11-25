@@ -1,16 +1,29 @@
 import groovy.xml.XmlUtil
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "org.jlleitschuh.gradle.ktlint" version "9.4.0"
+}
+
+def gitDescribe = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--always', '--tags', '--dirty=-dirty'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
 
 android {
 
-    compileSdkVersion 29
-    buildToolsVersion '29.0.2'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.2'
 
     defaultConfig {
-        minSdkVersion 29
-        targetSdkVersion 29
+        minSdkVersion 29 // leave at 29 for robolectric tests
+        targetSdkVersion 30
+        versionNameSuffix "-$gitDescribe"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
     }
@@ -22,7 +35,8 @@ android {
     }
 
     lintOptions {
-        abortOnError false
+        disable "CheckedExceptions"
+        abortOnError true
     }
     compileOptions {
         targetCompatibility 1.8
@@ -71,6 +85,19 @@ android {
     }
 }
 
+apply from: '../gradle/dependencies.gradle'
+
+ktlint {
+    version = "0.36.0" // https://github.com/pinterest/ktlint/issues/764
+    android = true
+    enableExperimentalRules = false
+    verbose = true
+    disabledRules = [
+            "import-ordering",
+            "no-blank-line-before-rbrace",
+    ]
+}
+
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
         if (JavaVersion.current() >= JavaVersion.VERSION_1_9) {
@@ -89,9 +116,14 @@ preBuild.doLast {
         def jdkNode = parsedXml.component[1].orderEntry.find { it.'@type' == 'jdk' }
         parsedXml.component[1].remove(jdkNode)
 
-        def sdkString = "Android API " + android.compileSdkVersion.substring("android-".length()) + " Platform"
+        def apiString = android.compileSdkVersion.substring("android-".length())
+        def sdkString = "Android API " + apiString + " Platform"
         //noinspection GroovyResultOfObjectAllocationIgnored // the note gets inserted
-        new Node(parsedXml.component[1], 'orderEntry', ['type': 'jdk', 'jdkName': sdkString, 'jdkType': 'Android SDK'])
+        new Node(parsedXml.component[1], 'orderEntry', [
+                'type'   : 'jdk',
+                'jdkName': sdkString,
+                'jdkType': 'Android SDK'
+        ])
         XmlUtil.serialize(parsedXml, new FileOutputStream(imlFile))
 
     } catch (NullPointerException | FileNotFoundException ex) {
@@ -99,46 +131,10 @@ preBuild.doLast {
     }
 }
 
-// To produce these binaries, in latest AOSP source tree, run
-// $ make
-def aospDeps = fileTree(include: [
-        // out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar
-        'android.jar',
-        // out/target/common/obj/JAVA_LIBRARIES/core-libart_intermediates/classes.jar
-        'libcore.jar'
-], dir: 'libs')
-
-// If the dependencies below are updated please make sure to update the
-// prebuilt libraries and Android.bp in the top `libs` folder to reflect that.
-// You can copy these libraries from ~/.gradle/caches/modules-2
-dependencies {
-    compileOnly aospDeps
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
-    implementation 'commons-io:commons-io:2.6'
-    implementation 'io.github.novacrypto:BIP39:2019.01.27'
-    implementation 'org.koin:koin-androidx-viewmodel:2.0.1'
-
-    implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'androidx.preference:preference-ktx:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-alpha05'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-
-    lintChecks 'com.github.thirdegg:lint-rules:0.0.4-alpha'
-
-    def junit_version = "5.5.2"
-    testImplementation aospDeps
-    testImplementation 'androidx.test.ext:junit:1.1.1'
-    testImplementation 'org.robolectric:robolectric:4.3.1'
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
-    testImplementation 'io.mockk:mockk:1.9.3'
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junit_version"
-
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
+configurations {
+    all {
+        resolutionStrategy {
+            failOnNonReproducibleResolution()
+        }
+    }
 }

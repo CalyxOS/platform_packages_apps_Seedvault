@@ -16,7 +16,7 @@ class RecoveryCodeActivity : BackupActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (isSetupWizard()) hideSystemUI()
+        if (isSetupWizard()) hideSystemUiNavigation()
 
         setContentView(R.layout.activity_recovery_code)
 
@@ -49,14 +49,14 @@ class RecoveryCodeActivity : BackupActivity() {
 
     private fun showOutput() {
         supportFragmentManager.beginTransaction()
-                .add(R.id.fragment, RecoveryCodeOutputFragment(), "Code")
-                .commit()
+            .add(R.id.fragment, RecoveryCodeOutputFragment(), "Code")
+            .commit()
     }
 
     private fun showInput(addToBackStack: Boolean) {
         val tag = "Confirm"
         val fragmentTransaction = supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment, RecoveryCodeInputFragment(), tag)
+            .replace(R.id.fragment, RecoveryCodeInputFragment(), tag)
         if (addToBackStack) fragmentTransaction.addToBackStack(tag)
         fragmentTransaction.commit()
     }

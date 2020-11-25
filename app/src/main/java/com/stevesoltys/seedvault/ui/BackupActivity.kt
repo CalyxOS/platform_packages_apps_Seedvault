@@ -20,12 +20,12 @@ abstract class BackupActivity : AppCompatActivity() {
 
     protected fun showFragment(f: Fragment, addToBackStack: Boolean = false) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment, f)
+            .replace(R.id.fragment, f)
         if (addToBackStack) fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
     }
 
-    protected fun hideSystemUI() {
+    protected fun hideSystemUiNavigation() {
         window.decorView.systemUiVisibility = SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
 

@@ -3,7 +3,6 @@ package com.stevesoltys.seedvault.ui.storage
 import android.app.Application
 import android.content.Context
 import android.content.Context.USB_SERVICE
-import android.content.Intent
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 import android.hardware.usb.UsbManager
@@ -14,6 +13,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stevesoltys.seedvault.R
 import com.stevesoltys.seedvault.isMassStorage
+import com.stevesoltys.seedvault.permitDiskReads
 import com.stevesoltys.seedvault.settings.BackupManagerSettings
 import com.stevesoltys.seedvault.settings.FlashDrive
 import com.stevesoltys.seedvault.settings.SettingsManager
@@ -24,8 +24,8 @@ import com.stevesoltys.seedvault.ui.MutableLiveEvent
 private val TAG = StorageViewModel::class.java.simpleName
 
 internal abstract class StorageViewModel(
-        private val app: Application,
-        protected val settingsManager: SettingsManager
+    private val app: Application,
+    protected val settingsManager: SettingsManager
 ) : AndroidViewModel(app), RemovableStorageListener {
 
     private val mStorageRoots = MutableLiveData<List<StorageRoot>>()
@@ -44,10 +44,15 @@ internal abstract class StorageViewModel(
     abstract val isRestoreOperation: Boolean
 
     companion object {
-        internal fun validLocationIsSet(context: Context, settingsManager: SettingsManager): Boolean {
+        internal fun validLocationIsSet(
+            context: Context,
+            settingsManager: SettingsManager
+        ): Boolean {
             val storage = settingsManager.getStorage() ?: return false
             if (storage.isUsb) return true
-            return storage.getDocumentFile(context).isDirectory
+            return permitDiskReads {
+                storage.getDocumentFile(context).isDirectory
+            }
         }
     }
 
@@ -66,14 +71,18 @@ internal abstract class StorageViewModel(
         storageRoot = root
     }
 
-    internal fun onUriPermissionGranted(result: Intent?) {
-        val uri = result?.data ?: return
+    internal fun onUriPermissionResultReceived(uri: Uri?) {
+        if (uri == null) {
+            val msg = app.getString(R.string.storage_check_fragment_permission_error)
+            mLocationChecked.setEvent(LocationResult(msg))
+            return
+        }
 
         // inform UI that a location has been successfully selected
         mLocationSet.setEvent(true)
 
         // persist permission to access backup folder across reboots
-        val takeFlags = result.flags and (FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
+        val takeFlags = FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION
         app.contentResolver.takePersistableUriPermission(uri, takeFlags)
 
         onLocationSet(uri)
@@ -92,7 +101,7 @@ internal abstract class StorageViewModel(
         } else {
             root.title
         }
-        val storage = Storage(uri, name, root.isUsb)
+        val storage = Storage(uri, name, root.isUsb, root.requiresNetwork)
         settingsManager.setStorage(storage)
 
         if (storage.isUsb) {
@@ -100,11 +109,10 @@ internal abstract class StorageViewModel(
             val wasSaved = saveUsbDevice()
             // reset stored flash drive, if we did not update it
             if (!wasSaved) settingsManager.setFlashDrive(null)
-            BackupManagerSettings.disableAutomaticBackups(app.contentResolver)
         } else {
             settingsManager.setFlashDrive(null)
-            BackupManagerSettings.enableAutomaticBackups(app.contentResolver)
         }
+        BackupManagerSettings.resetDefaults(app.contentResolver)
 
         Log.d(TAG, "New storage location saved: $uri")
 

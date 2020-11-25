@@ -12,7 +12,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputLayout
 import com.stevesoltys.seedvault.R
@@ -43,8 +43,11 @@ class RecoveryCodeInputFragment : Fragment() {
     private lateinit var wordLayout12: TextInputLayout
     private lateinit var wordList: ConstraintLayout
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val v: View = inflater.inflate(R.layout.fragment_recovery_code_input, container, false)
 
         introText = v.findViewById(R.id.introText)
@@ -67,8 +70,8 @@ class RecoveryCodeInputFragment : Fragment() {
         return v
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         if (viewModel.isRestore) {
             introText.setText(R.string.recovery_code_input_intro)
@@ -127,7 +130,8 @@ class RecoveryCodeInputFragment : Fragment() {
     private fun showWrongWordError(input: List<CharSequence>, e: WordNotFoundException) {
         val i = input.indexOf(e.word)
         if (i == -1) throw AssertionError()
-        showError(i, getString(R.string.recovery_code_error_invalid_word, e.suggestion1, e.suggestion2))
+        val str = getString(R.string.recovery_code_error_invalid_word, e.suggestion1, e.suggestion2)
+        showError(i, str)
     }
 
     private fun showError(i: Int, errorMsg: CharSequence) {
@@ -137,6 +141,7 @@ class RecoveryCodeInputFragment : Fragment() {
         }
     }
 
+    @Suppress("MagicNumber")
     private fun getWordLayout(i: Int) = when (i + 1) {
         1 -> wordLayout1
         2 -> wordLayout2

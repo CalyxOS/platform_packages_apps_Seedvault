@@ -5,9 +5,11 @@ import android.app.backup.BackupTransport.TRANSPORT_OK
 import android.app.backup.BackupTransport.TRANSPORT_PACKAGE_REJECTED
 import android.app.backup.BackupTransport.TRANSPORT_QUOTA_EXCEEDED
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -16,6 +18,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import kotlin.random.Random
 
+@Suppress("BlockingMethodInNonBlockingContext")
 internal class FullBackupTest : BackupTest() {
 
     private val plugin = mockk<FullBackupPlugin>()
@@ -62,7 +65,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `performFullBackup runs ok`() {
+    fun `performFullBackup runs ok`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectClearState()
 
@@ -73,7 +76,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `sendBackupData first call over quota`() {
+    fun `sendBackupData first call over quota`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         val numBytes = (quota + 1).toInt()
@@ -89,7 +92,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `sendBackupData second call over quota`() {
+    fun `sendBackupData second call over quota`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         val numBytes1 = quota.toInt()
@@ -109,7 +112,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `sendBackupData throws exception when reading from InputStream`() {
+    fun `sendBackupData throws exception when reading from InputStream`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         every { plugin.getQuota() } returns quota
@@ -125,11 +128,11 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `sendBackupData throws exception when getting outputStream`() {
+    fun `sendBackupData throws exception when getting outputStream`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
 
         every { plugin.getQuota() } returns quota
-        every { plugin.getOutputStream(packageInfo) } throws IOException()
+        coEvery { plugin.getOutputStream(packageInfo) } throws IOException()
         expectClearState()
 
         assertEquals(TRANSPORT_OK, backup.performFullBackup(packageInfo, data))
@@ -141,11 +144,11 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `sendBackupData throws exception when writing header`() {
+    fun `sendBackupData throws exception when writing header`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
 
         every { plugin.getQuota() } returns quota
-        every { plugin.getOutputStream(packageInfo) } returns outputStream
+        coEvery { plugin.getOutputStream(packageInfo) } returns outputStream
         every { inputFactory.getInputStream(data) } returns inputStream
         every { headerWriter.writeVersion(outputStream, header) } throws IOException()
         expectClearState()
@@ -159,24 +162,25 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `sendBackupData throws exception when writing encrypted data to OutputStream`() {
-        every { inputFactory.getInputStream(data) } returns inputStream
-        expectInitializeOutputStream()
-        every { plugin.getQuota() } returns quota
-        every { inputStream.read(any(), any(), bytes.size) } returns bytes.size
-        every { crypto.encryptSegment(outputStream, any()) } throws IOException()
-        expectClearState()
+    fun `sendBackupData throws exception when writing encrypted data to OutputStream`() =
+        runBlocking {
+            every { inputFactory.getInputStream(data) } returns inputStream
+            expectInitializeOutputStream()
+            every { plugin.getQuota() } returns quota
+            every { inputStream.read(any(), any(), bytes.size) } returns bytes.size
+            every { crypto.encryptSegment(outputStream, any()) } throws IOException()
+            expectClearState()
 
-        assertEquals(TRANSPORT_OK, backup.performFullBackup(packageInfo, data))
-        assertTrue(backup.hasState())
-        assertEquals(TRANSPORT_ERROR, backup.sendBackupData(bytes.size))
-        assertTrue(backup.hasState())
-        assertEquals(TRANSPORT_OK, backup.finishBackup())
-        assertFalse(backup.hasState())
-    }
+            assertEquals(TRANSPORT_OK, backup.performFullBackup(packageInfo, data))
+            assertTrue(backup.hasState())
+            assertEquals(TRANSPORT_ERROR, backup.sendBackupData(bytes.size))
+            assertTrue(backup.hasState())
+            assertEquals(TRANSPORT_OK, backup.finishBackup())
+            assertFalse(backup.hasState())
+        }
 
     @Test
-    fun `sendBackupData runs ok`() {
+    fun `sendBackupData runs ok`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         val numBytes1 = (quota / 2).toInt()
@@ -196,18 +200,18 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `clearBackupData delegates to plugin`() {
-        every { plugin.removeDataOfPackage(packageInfo) } just Runs
+    fun `clearBackupData delegates to plugin`() = runBlocking {
+        coEvery { plugin.removeDataOfPackage(packageInfo) } just Runs
 
         backup.clearBackupData(packageInfo)
     }
 
     @Test
-    fun `cancel full backup runs ok`() {
+    fun `cancel full backup runs ok`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         expectClearState()
-        every { plugin.removeDataOfPackage(packageInfo) } just Runs
+        coEvery { plugin.removeDataOfPackage(packageInfo) } just Runs
 
         assertEquals(TRANSPORT_OK, backup.performFullBackup(packageInfo, data))
         assertTrue(backup.hasState())
@@ -216,11 +220,11 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `cancel full backup ignores exception when calling plugin`() {
+    fun `cancel full backup ignores exception when calling plugin`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         expectClearState()
-        every { plugin.removeDataOfPackage(packageInfo) } throws IOException()
+        coEvery { plugin.removeDataOfPackage(packageInfo) } throws IOException()
 
         assertEquals(TRANSPORT_OK, backup.performFullBackup(packageInfo, data))
         assertTrue(backup.hasState())
@@ -229,7 +233,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `clearState throws exception when flushing OutputStream`() {
+    fun `clearState throws exception when flushing OutputStream`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         val numBytes = 42
@@ -245,7 +249,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `clearState ignores exception when closing OutputStream`() {
+    fun `clearState ignores exception when closing OutputStream`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         every { outputStream.flush() } just Runs
@@ -260,7 +264,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `clearState ignores exception when closing InputStream`() {
+    fun `clearState ignores exception when closing InputStream`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         every { outputStream.flush() } just Runs
@@ -275,7 +279,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     @Test
-    fun `clearState ignores exception when closing ParcelFileDescriptor`() {
+    fun `clearState ignores exception when closing ParcelFileDescriptor`() = runBlocking {
         every { inputFactory.getInputStream(data) } returns inputStream
         expectInitializeOutputStream()
         every { outputStream.flush() } just Runs
@@ -290,7 +294,7 @@ internal class FullBackupTest : BackupTest() {
     }
 
     private fun expectInitializeOutputStream() {
-        every { plugin.getOutputStream(packageInfo) } returns outputStream
+        coEvery { plugin.getOutputStream(packageInfo) } returns outputStream
         every { headerWriter.writeVersion(outputStream, header) } just Runs
         every { crypto.encryptHeader(outputStream, header) } just Runs
     }

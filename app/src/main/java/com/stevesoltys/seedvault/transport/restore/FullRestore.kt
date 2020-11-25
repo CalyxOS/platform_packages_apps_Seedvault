@@ -16,18 +16,21 @@ import java.io.IOException
 import java.io.InputStream
 
 private class FullRestoreState(
-        internal val token: Long,
-        internal val packageInfo: PackageInfo) {
-    internal var inputStream: InputStream? = null
+    val token: Long,
+    val packageInfo: PackageInfo
+) {
+    var inputStream: InputStream? = null
 }
 
 private val TAG = FullRestore::class.java.simpleName
 
+@Suppress("BlockingMethodInNonBlockingContext")
 internal class FullRestore(
-        private val plugin: FullRestorePlugin,
-        private val outputFactory: OutputFactory,
-        private val headerReader: HeaderReader,
-        private val crypto: Crypto) {
+    private val plugin: FullRestorePlugin,
+    private val outputFactory: OutputFactory,
+    private val headerReader: HeaderReader,
+    private val crypto: Crypto
+) {
 
     private var state: FullRestoreState? = null
 
@@ -37,7 +40,7 @@ internal class FullRestore(
      * Return true if there is data stored for the given package.
      */
     @Throws(IOException::class)
-    fun hasDataForPackage(token: Long, packageInfo: PackageInfo): Boolean {
+    suspend fun hasDataForPackage(token: Long, packageInfo: PackageInfo): Boolean {
         return plugin.hasDataForPackage(token, packageInfo)
     }
 
@@ -78,7 +81,7 @@ internal class FullRestore(
      * Any other negative value such as [TRANSPORT_ERROR] is treated as a fatal error condition
      * that aborts all further restore operations on the current dataset.
      */
-    fun getNextFullRestoreDataChunk(socket: ParcelFileDescriptor): Int {
+    suspend fun getNextFullRestoreDataChunk(socket: ParcelFileDescriptor): Int {
         val state = this.state ?: throw IllegalStateException("no state")
         val packageName = state.packageInfo.packageName
 
@@ -113,6 +116,7 @@ internal class FullRestore(
         try {
             // read segment from input stream and decrypt it
             val decrypted = try {
+                // TODO handle IOException
                 crypto.decryptSegment(inputStream)
             } catch (e: EOFException) {
                 Log.i(TAG, "   EOF")

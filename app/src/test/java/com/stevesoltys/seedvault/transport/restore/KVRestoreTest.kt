@@ -3,23 +3,26 @@ package com.stevesoltys.seedvault.transport.restore
 import android.app.backup.BackupDataOutput
 import android.app.backup.BackupTransport.TRANSPORT_ERROR
 import android.app.backup.BackupTransport.TRANSPORT_OK
+import com.stevesoltys.seedvault.coAssertThrows
 import com.stevesoltys.seedvault.encodeBase64
 import com.stevesoltys.seedvault.getRandomByteArray
 import com.stevesoltys.seedvault.header.UnsupportedVersionException
 import com.stevesoltys.seedvault.header.VERSION
 import com.stevesoltys.seedvault.header.VersionHeader
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verifyAll
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.io.InputStream
 import kotlin.random.Random
 
+@Suppress("BlockingMethodInNonBlockingContext")
 internal class KVRestoreTest : RestoreTest() {
 
     private val plugin = mockk<KVRestorePlugin>()
@@ -34,37 +37,39 @@ internal class KVRestoreTest : RestoreTest() {
     private val versionHeader2 = VersionHeader(VERSION, packageInfo.packageName, key2)
 
     @Test
-    fun `hasDataForPackage() delegates to plugin`() {
+    fun `hasDataForPackage() delegates to plugin`() = runBlocking {
         val result = Random.nextBoolean()
 
-        every { plugin.hasDataForPackage(token, packageInfo) } returns result
+        coEvery { plugin.hasDataForPackage(token, packageInfo) } returns result
 
         assertEquals(result, restore.hasDataForPackage(token, packageInfo))
     }
 
     @Test
     fun `getRestoreData() throws without initializing state`() {
-        assertThrows(IllegalStateException::class.java) {
+        coAssertThrows(IllegalStateException::class.java) {
             restore.getRestoreData(fileDescriptor)
         }
     }
 
     @Test
-    fun `listing records throws`() {
+    fun `listing records throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
-        every { plugin.listRecords(token, packageInfo) } throws IOException()
+        coEvery { plugin.listRecords(token, packageInfo) } throws IOException()
 
         assertEquals(TRANSPORT_ERROR, restore.getRestoreData(fileDescriptor))
     }
 
     @Test
-    fun `reading VersionHeader with unsupported version throws`() {
+    fun `reading VersionHeader with unsupported version throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
-        every { headerReader.readVersion(inputStream) } throws UnsupportedVersionException(unsupportedVersion)
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        every {
+            headerReader.readVersion(inputStream)
+        } throws UnsupportedVersionException(unsupportedVersion)
         streamsGetClosed()
 
         assertEquals(TRANSPORT_ERROR, restore.getRestoreData(fileDescriptor))
@@ -72,11 +77,11 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `error reading VersionHeader throws`() {
+    fun `error reading VersionHeader throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } throws IOException()
         streamsGetClosed()
 
@@ -85,13 +90,20 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `decrypting segment throws`() {
+    fun `decrypting segment throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } returns versionHeader
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } returns versionHeader
         every { crypto.decryptMultipleSegments(inputStream) } throws IOException()
         streamsGetClosed()
 
@@ -100,13 +112,20 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `decrypting header throws`() {
+    fun `decrypting header throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } throws IOException()
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } throws IOException()
         streamsGetClosed()
 
         assertEquals(TRANSPORT_ERROR, restore.getRestoreData(fileDescriptor))
@@ -114,13 +133,20 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `decrypting header throws security exception`() {
+    fun `decrypting header throws security exception`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } throws SecurityException()
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } throws SecurityException()
         streamsGetClosed()
 
         assertEquals(TRANSPORT_ERROR, restore.getRestoreData(fileDescriptor))
@@ -128,13 +154,20 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `writing header throws`() {
+    fun `writing header throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } returns versionHeader
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } returns versionHeader
         every { crypto.decryptMultipleSegments(inputStream) } returns data
         every { output.writeEntityHeader(key, data.size) } throws IOException()
         streamsGetClosed()
@@ -144,13 +177,20 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `writing value throws`() {
+    fun `writing value throws`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } returns versionHeader
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } returns versionHeader
         every { crypto.decryptMultipleSegments(inputStream) } returns data
         every { output.writeEntityHeader(key, data.size) } returns 42
         every { output.writeEntityData(data, data.size) } throws IOException()
@@ -161,13 +201,20 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `writing value succeeds`() {
+    fun `writing value succeeds`() = runBlocking {
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput()
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } returns versionHeader
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } returns versionHeader
         every { crypto.decryptMultipleSegments(inputStream) } returns data
         every { output.writeEntityHeader(key, data.size) } returns 42
         every { output.writeEntityData(data, data.size) } returns data.size
@@ -178,23 +225,37 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     @Test
-    fun `writing two values succeeds`() {
+    fun `writing two values succeeds`() = runBlocking {
         val data2 = getRandomByteArray()
         val inputStream2 = mockk<InputStream>()
         restore.initializeState(token, packageInfo)
 
         getRecordsAndOutput(listOf(key64, key264))
         // first key/value
-        every { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key64) } returns inputStream
         every { headerReader.readVersion(inputStream) } returns VERSION
-        every { crypto.decryptHeader(inputStream, VERSION, packageInfo.packageName, key) } returns versionHeader
+        every {
+            crypto.decryptHeader(
+                inputStream,
+                VERSION,
+                packageInfo.packageName,
+                key
+            )
+        } returns versionHeader
         every { crypto.decryptMultipleSegments(inputStream) } returns data
         every { output.writeEntityHeader(key, data.size) } returns 42
         every { output.writeEntityData(data, data.size) } returns data.size
         // second key/value
-        every { plugin.getInputStreamForRecord(token, packageInfo, key264) } returns inputStream2
+        coEvery { plugin.getInputStreamForRecord(token, packageInfo, key264) } returns inputStream2
         every { headerReader.readVersion(inputStream2) } returns VERSION
-        every { crypto.decryptHeader(inputStream2, VERSION, packageInfo.packageName, key2) } returns versionHeader2
+        every {
+            crypto.decryptHeader(
+                inputStream2,
+                VERSION,
+                packageInfo.packageName,
+                key2
+            )
+        } returns versionHeader2
         every { crypto.decryptMultipleSegments(inputStream2) } returns data2
         every { output.writeEntityHeader(key2, data2.size) } returns 42
         every { output.writeEntityData(data2, data2.size) } returns data2.size
@@ -205,7 +266,7 @@ internal class KVRestoreTest : RestoreTest() {
     }
 
     private fun getRecordsAndOutput(recordKeys: List<String> = listOf(key64)) {
-        every { plugin.listRecords(token, packageInfo) } returns recordKeys
+        coEvery { plugin.listRecords(token, packageInfo) } returns recordKeys
         every { outputFactory.getBackupDataOutput(fileDescriptor) } returns output
     }
 

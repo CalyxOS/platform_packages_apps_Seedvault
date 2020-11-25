@@ -24,24 +24,17 @@ android_app {
         "app/src/main/res",
     ],
     static_libs: [
-        "com.google.android.material_material",
-        "androidx.core_core",
+        "kotlin-stdlib-jdk8",
+        "androidx.core_core-ktx",
         "androidx.preference_preference",
-        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-viewmodel-ktx",
+        "androidx.lifecycle_lifecycle-livedata-ktx",
         "androidx-constraintlayout_constraintlayout",
-        "seedvault-lib-androidx-core-ktx",
-        "seedvault-lib-androidx-lifecycle-livedata-core-ktx",
-        "seedvault-lib-androidx-lifecycle-livedata-ktx",
-        "seedvault-lib-androidx-lifecycle-viewmodel-ktx",
+        "com.google.android.material_material",
+        "seedvault-lib-koin-core", // did not manage to add this as transitive dependency
         "seedvault-lib-koin-android",
         "seedvault-lib-koin-androidx-viewmodel",
-        "seedvault-lib-commons-io",
-        "seedvault-lib-koin-core",
-        "seedvault-lib-kotlinx-coroutines-android",
-        "seedvault-lib-kotlinx-coroutines-core",
         "seedvault-lib-novacrypto-bip39",
-        "seedvault-lib-novacrypto-sha256",
-        "seedvault-lib-novacrypto-toruntime"
     ],
     manifest: "app/src/main/AndroidManifest.xml",
 
@@ -49,9 +42,13 @@ android_app {
     certificate: "platform",
     privileged: true,
     required: [
+        "LocalContactsBackup",
         "privapp_whitelist_com.stevesoltys.backup",
         "com.stevesoltys.backup_whitelist"
-    ]
+    ],
+    optimize: {
+        enabled: false,
+    },
 }
 
 prebuilt_etc {
