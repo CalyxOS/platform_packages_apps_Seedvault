@@ -163,10 +163,10 @@ internal class SettingsViewModel(
      * is not set. This method sets this flag, if it is not already set.
      * No other apps were found to check for this, so this should affect only call log.
      */
-    fun enableCallLogBackup() {
+    fun disableCallLogKVBackup() {
         // first check if the flag is already set
-        if (Settings.Secure.getInt(app.contentResolver, USER_FULL_DATA_BACKUP_AWARE, 0) == 0) {
-            Settings.Secure.putInt(app.contentResolver, USER_FULL_DATA_BACKUP_AWARE, 1)
+        if (Settings.Secure.getInt(app.contentResolver, USER_FULL_DATA_BACKUP_AWARE, 0) == 1) {
+            Settings.Secure.putInt(app.contentResolver, USER_FULL_DATA_BACKUP_AWARE, 0)
         }
     }
 
