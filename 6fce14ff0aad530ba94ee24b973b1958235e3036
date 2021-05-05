@@ -16,6 +16,24 @@
       "revId": "6fce14ff0aad530ba94ee24b973b1958235e3036",
       "serverId": "35266860-6252-469c-a67d-185064479fc0",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6cfa4668_add68db3",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/settings/SettingsViewModel.kt",
+        "patchSetId": 3
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-05T03:56:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "03f31740_e17f2722",
+      "revId": "6fce14ff0aad530ba94ee24b973b1958235e3036",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": false
     }
   ]
 }
