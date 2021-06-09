@@ -16,6 +16,7 @@
     -->
     <string-array name="storage_authority_whitelist" tools:ignore="InconsistentArrays">
         <item>com.android.externalstorage.documents</item>
+        <item>org.calyxos.providers.crossprofile.documents</item>
         <item>org.nextcloud.documents</item>
     </string-array>
 
