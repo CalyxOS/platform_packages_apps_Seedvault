@@ -3,6 +3,7 @@ package com.stevesoltys.seedvault.plugins.saf
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.UserHandle
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.stevesoltys.seedvault.plugins.EncryptedMetadata
@@ -20,7 +21,10 @@ internal class DocumentsProviderStoragePlugin(
     private val storage: DocumentsStorage,
 ) : StoragePlugin {
 
-    private val packageManager: PackageManager = context.packageManager
+    private val mContext: Context get() = if (storage.storage?.isUsb == true)
+        context.createContextAsUser(UserHandle.SYSTEM, 0) else context
+
+    private val packageManager: PackageManager = mContext.packageManager
 
     @Throws(IOException::class)
     override suspend fun startNewRestoreSet(token: Long) {
@@ -34,7 +38,7 @@ internal class DocumentsProviderStoragePlugin(
     @Throws(IOException::class)
     override suspend fun initializeDevice() {
         // wipe existing data
-        storage.getSetDir()?.deleteContents(context)
+        storage.getSetDir()?.deleteContents(mContext)
 
         // reset storage without new token, so folders get recreated
         // otherwise stale DocumentFiles will hang around
@@ -47,41 +51,41 @@ internal class DocumentsProviderStoragePlugin(
     @Throws(IOException::class)
     override suspend fun hasData(token: Long, name: String): Boolean {
         val setDir = storage.getSetDir(token) ?: return false
-        return setDir.findFileBlocking(context, name) != null
+        return setDir.findFileBlocking(mContext, name) != null
     }
 
     @Throws(IOException::class)
     override suspend fun getOutputStream(token: Long, name: String): OutputStream {
         val setDir = storage.getSetDir(token) ?: throw IOException()
-        val file = setDir.createOrGetFile(context, name)
+        val file = setDir.createOrGetFile(mContext, name)
         return storage.getOutputStream(file)
     }
 
     @Throws(IOException::class)
     override suspend fun getInputStream(token: Long, name: String): InputStream {
         val setDir = storage.getSetDir(token) ?: throw IOException()
-        val file = setDir.findFileBlocking(context, name) ?: throw FileNotFoundException()
+        val file = setDir.findFileBlocking(mContext, name) ?: throw FileNotFoundException()
         return storage.getInputStream(file)
     }
 
     @Throws(IOException::class)
     override suspend fun removeData(token: Long, name: String) {
         val setDir = storage.getSetDir(token) ?: throw IOException()
-        val file = setDir.findFileBlocking(context, name) ?: return
+        val file = setDir.findFileBlocking(mContext, name) ?: return
         if (!file.delete()) throw IOException("Failed to delete $name")
     }
 
     @Throws(IOException::class)
     override suspend fun hasBackup(uri: Uri): Boolean {
-        val parent = DocumentFile.fromTreeUri(context, uri) ?: throw AssertionError()
-        val rootDir = parent.findFileBlocking(context, DIRECTORY_ROOT) ?: return false
-        val backupSets = getBackups(context, rootDir)
+        val parent = DocumentFile.fromTreeUri(mContext, uri) ?: throw AssertionError()
+        val rootDir = parent.findFileBlocking(mContext, DIRECTORY_ROOT) ?: return false
+        val backupSets = getBackups(mContext, rootDir)
         return backupSets.isNotEmpty()
     }
 
     override suspend fun getAvailableBackups(): Sequence<EncryptedMetadata>? {
         val rootDir = storage.rootBackupDir ?: return null
-        val backupSets = getBackups(context, rootDir)
+        val backupSets = getBackups(mContext, rootDir)
         val iterator = backupSets.iterator()
         return generateSequence {
             if (!iterator.hasNext()) return@generateSequence null // end sequence

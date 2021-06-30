@@ -2,11 +2,13 @@
 
 package com.stevesoltys.seedvault.plugins.saf
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
+import android.os.UserHandle
 import android.provider.DocumentsContract.Document.COLUMN_DOCUMENT_ID
 import android.provider.DocumentsContract.EXTRA_LOADING
 import android.provider.DocumentsContract.buildChildDocumentsUriUsingTree
@@ -44,7 +46,10 @@ internal class DocumentsStorage(
     private val settingsManager: SettingsManager,
 ) {
 
-    private val contentResolver = context.contentResolver
+    private val mContext: Context get() = if (settingsManager.getStorage()?.isUsb == true)
+        context.createContextAsUser(UserHandle.SYSTEM, 0) else context
+
+    private val contentResolver: ContentResolver get() = mContext.contentResolver
 
     internal var storage: Storage? = null
         get() {
@@ -55,13 +60,13 @@ internal class DocumentsStorage(
     internal var rootBackupDir: DocumentFile? = null
         get() = runBlocking {
             if (field == null) {
-                val parent = storage?.getDocumentFile(context)
+                val parent = storage?.getDocumentFile(mContext)
                     ?: return@runBlocking null
                 field = try {
-                    parent.createOrGetDirectory(context, DIRECTORY_ROOT).apply {
+                    parent.createOrGetDirectory(mContext, DIRECTORY_ROOT).apply {
                         // create .nomedia file to prevent Android's MediaScanner
                         // from trying to index the backup
-                        createOrGetFile(context, FILE_NO_MEDIA)
+                        createOrGetFile(mContext, FILE_NO_MEDIA)
                     }
                 } catch (e: IOException) {
                     Log.e(TAG, "Error creating root backup dir.", e)
@@ -82,7 +87,7 @@ internal class DocumentsStorage(
             if (field == null) {
                 if (currentToken == 0L) return@runBlocking null
                 field = try {
-                    rootBackupDir?.createOrGetDirectory(context, currentToken.toString())
+                    rootBackupDir?.createOrGetDirectory(mContext, currentToken.toString())
                 } catch (e: IOException) {
                     Log.e(TAG, "Error creating current restore set dir.", e)
                     null
@@ -107,21 +112,21 @@ internal class DocumentsStorage(
     @Throws(IOException::class)
     suspend fun getSetDir(token: Long = currentToken ?: error("no token")): DocumentFile? {
         if (token == currentToken) return currentSetDir
-        return rootBackupDir?.findFileBlocking(context, token.toString())
+        return rootBackupDir?.findFileBlocking(mContext, token.toString())
     }
 
     @Throws(IOException::class)
     @Suppress("Deprecation")
     @Deprecated("Use only for v0 restore")
     suspend fun getKVBackupDir(token: Long): DocumentFile? {
-        return getSetDir(token)?.findFileBlocking(context, DIRECTORY_KEY_VALUE_BACKUP)
+        return getSetDir(token)?.findFileBlocking(mContext, DIRECTORY_KEY_VALUE_BACKUP)
     }
 
     @Throws(IOException::class)
     @Suppress("Deprecation")
     @Deprecated("Use only for v0 restore")
     suspend fun getFullBackupDir(token: Long): DocumentFile? {
-        return getSetDir(token)?.findFileBlocking(context, DIRECTORY_FULL_BACKUP)
+        return getSetDir(token)?.findFileBlocking(mContext, DIRECTORY_FULL_BACKUP)
     }
 
     @Throws(IOException::class)
@@ -143,12 +148,12 @@ internal class DocumentsStorage(
  */
 @Throws(IOException::class)
 internal suspend fun DocumentFile.createOrGetFile(
-    context: Context,
+    mContext: Context,
     name: String,
     mimeType: String = MIME_TYPE,
 ): DocumentFile {
     return try {
-        findFileBlocking(context, name) ?: createFile(mimeType, name)?.apply {
+        findFileBlocking(mContext, name) ?: createFile(mimeType, name)?.apply {
             if (this.name != name) {
                 throw IOException("File named ${this.name}, but should be $name")
             }
@@ -164,8 +169,8 @@ internal suspend fun DocumentFile.createOrGetFile(
  * Checks if a directory already exists and if not, creates it.
  */
 @Throws(IOException::class)
-suspend fun DocumentFile.createOrGetDirectory(context: Context, name: String): DocumentFile {
-    return findFileBlocking(context, name) ?: createDirectory(name)?.apply {
+suspend fun DocumentFile.createOrGetDirectory(mContext: Context, name: String): DocumentFile {
+    return findFileBlocking(mContext, name) ?: createDirectory(name)?.apply {
         if (this.name != name) {
             throw IOException("Directory named ${this.name}, but should be $name")
         }
@@ -173,8 +178,8 @@ suspend fun DocumentFile.createOrGetDirectory(context: Context, name: String): D
 }
 
 @Throws(IOException::class)
-suspend fun DocumentFile.deleteContents(context: Context) {
-    for (file in listFilesBlocking(context)) file.delete()
+suspend fun DocumentFile.deleteContents(mContext: Context) {
+    for (file in listFilesBlocking(mContext)) file.delete()
 }
 
 fun DocumentFile.assertRightFile(packageInfo: PackageInfo) {
@@ -188,8 +193,8 @@ fun DocumentFile.assertRightFile(packageInfo: PackageInfo) {
  * This prevents getting an empty list even though there are children to be listed.
  */
 @Throws(IOException::class)
-suspend fun DocumentFile.listFilesBlocking(context: Context): List<DocumentFile> {
-    val resolver = context.contentResolver
+suspend fun DocumentFile.listFilesBlocking(mContext: Context): List<DocumentFile> {
+    val resolver = mContext.contentResolver
     val childrenUri = buildChildDocumentsUriUsingTree(uri, getDocumentId(uri))
     val projection = arrayOf(COLUMN_DOCUMENT_ID)
     val result = ArrayList<DocumentFile>()
@@ -204,7 +209,7 @@ suspend fun DocumentFile.listFilesBlocking(context: Context): List<DocumentFile>
         while (cursor.moveToNext()) {
             val documentId = cursor.getString(0)
             val documentUri = buildDocumentUriUsingTree(uri, documentId)
-            result.add(getTreeDocumentFile(this, context, documentUri))
+            result.add(getTreeDocumentFile(this, mContext, documentUri))
         }
     }
     return result
@@ -220,14 +225,14 @@ suspend fun DocumentFile.listFilesBlocking(context: Context): List<DocumentFile>
  * Also, [DocumentFile] is part of AndroidX, so we control the dependency and notice when it fails.
  */
 @VisibleForTesting
-internal fun getTreeDocumentFile(parent: DocumentFile, context: Context, uri: Uri): DocumentFile {
+internal fun getTreeDocumentFile(parent: DocumentFile, mContext: Context, uri: Uri): DocumentFile {
     @SuppressWarnings("MagicNumber")
     val constructor = parent.javaClass.declaredConstructors.find {
         it.name == "androidx.documentfile.provider.TreeDocumentFile" && it.parameterCount == 3
     }
     check(constructor != null) { "Could not find constructor for TreeDocumentFile" }
     constructor.isAccessible = true
-    return constructor.newInstance(parent, context, uri) as DocumentFile
+    return constructor.newInstance(parent, mContext, uri) as DocumentFile
 }
 
 /**
@@ -237,9 +242,9 @@ internal fun getTreeDocumentFile(parent: DocumentFile, context: Context, uri: Ur
  * when querying for a specific file in a directory,
  * so there is no point in trying to optimize the query by not listing all children.
  */
-suspend fun DocumentFile.findFileBlocking(context: Context, displayName: String): DocumentFile? {
+suspend fun DocumentFile.findFileBlocking(mContext: Context, displayName: String): DocumentFile? {
     val files = try {
-        listFilesBlocking(context)
+        listFilesBlocking(mContext)
     } catch (e: IOException) {
         Log.e(TAG, "Error finding file blocking", e)
         return null
