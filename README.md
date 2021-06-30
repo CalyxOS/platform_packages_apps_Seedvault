@@ -31,6 +31,7 @@ It uses the same internal APIs as `adb backup` which is deprecated and thus need
 * `android.permission.QUERY_ALL_PACKAGES` to get information about all installed apps for backup.
 * `android.permission.INSTALL_PACKAGES` to re-install apps when restoring from backup.
 * `android.permission.MANAGE_DOCUMENTS` to retrieve the available storage roots (optional) for better UX.
+* `android.permission.INTERACT_ACROSS_USERS` to use storage roots in other users.
 
 ## Contributing
 Bug reports and pull requests are welcome on GitHub at https://github.com/seedvault-app/seedvault.
