@@ -1,6 +1,7 @@
 package com.stevesoltys.seedvault.ui.storage
 
 import android.Manifest.permission.MANAGE_DOCUMENTS
+import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
@@ -12,6 +13,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.os.UserHandle
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.PROVIDER_INTERFACE
 import android.util.Log
@@ -45,7 +47,11 @@ data class StorageRoot(
 ) {
 
     internal val uri: Uri by lazy {
-        DocumentsContract.buildTreeDocumentUri(authority, documentId)
+        if (!isUsb)
+            DocumentsContract.buildTreeDocumentUri(authority, documentId)
+        else
+            ContentProvider.maybeAddUserId(DocumentsContract.buildTreeDocumentUri(
+                authority, documentId), UserHandle.USER_SYSTEM)
     }
 
     fun isInternal(): Boolean {
