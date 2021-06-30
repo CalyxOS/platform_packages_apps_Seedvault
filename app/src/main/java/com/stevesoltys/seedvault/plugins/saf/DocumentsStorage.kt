@@ -2,11 +2,13 @@
 
 package com.stevesoltys.seedvault.plugins.saf
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
+import android.os.UserHandle
 import android.provider.DocumentsContract.Document.COLUMN_DOCUMENT_ID
 import android.provider.DocumentsContract.EXTRA_LOADING
 import android.provider.DocumentsContract.buildChildDocumentsUriUsingTree
@@ -15,6 +17,7 @@ import android.provider.DocumentsContract.getDocumentId
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.documentfile.provider.DocumentFile
+import com.stevesoltys.seedvault.getSystemContext
 import com.stevesoltys.seedvault.settings.SettingsManager
 import com.stevesoltys.seedvault.settings.Storage
 import kotlinx.coroutines.TimeoutCancellationException
@@ -40,11 +43,15 @@ const val MIME_TYPE = "application/octet-stream"
 private val TAG = DocumentsStorage::class.java.simpleName
 
 internal class DocumentsStorage(
-    private val context: Context,
+    private val appContext: Context,
     private val settingsManager: SettingsManager,
 ) {
 
-    private val contentResolver = context.contentResolver
+    private val context: Context get() = appContext.getSystemContext {
+        storage?.isUsb ?: false
+    }
+
+    private val contentResolver: ContentResolver get() = context.contentResolver
 
     internal var storage: Storage? = null
         get() {
