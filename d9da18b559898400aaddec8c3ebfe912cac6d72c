@@ -35,6 +35,23 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "37a8305e_bbd122ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-06-30T09:45:07Z",
+      "side": 1,
+      "message": "The goal here was to have a reliable backup location, since internal storage of work profile goes away when it\u0027s deleted.\n\nIf this works with USB that would be great. We can skip internal storage for this then since it\u0027s not a recommended storage location anyway and was really only meant to be something interim wrt this.\n\nI\u0027m assuming backups won\u0027t override each other / create two separate restore sets, but we should still test.\n\nAnd also finally add the user number / some other identifier to the backup to make it easy to distinguish, but that\u0027s entirely separate from this and more of a medium-term project.",
+      "revId": "d9da18b559898400aaddec8c3ebfe912cac6d72c",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4e9e8b8e_4a970fb6",
@@ -60,6 +77,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6e43ac2d_f6cfdd1a",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootFetcher.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-06-30T09:45:07Z",
+      "side": 1,
+      "message": "Even better, do it only for `isUsb`",
+      "parentUuid": "4e9e8b8e_4a970fb6",
+      "range": {
+        "startLine": 50,
+        "startChar": 8,
+        "endLine": 50,
+        "endChar": 125
+      },
+      "revId": "d9da18b559898400aaddec8c3ebfe912cac6d72c",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "979b7693_6260ebb2",
         "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
         "patchSetId": 1
@@ -71,6 +112,30 @@
       "writtenOn": "2021-06-30T01:53:00Z",
       "side": 1,
       "message": "My suggestion would be to add the roots same as before with the exception of the internal storage root in which case we want to query it from userId 0",
+      "range": {
+        "startLine": 29,
+        "startChar": 23,
+        "endLine": 29,
+        "endChar": 121
+      },
+      "revId": "d9da18b559898400aaddec8c3ebfe912cac6d72c",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f702d1ca_5e5ae3aa",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-06-30T09:45:07Z",
+      "side": 1,
+      "message": "Same, usb instead of internal storage.",
+      "parentUuid": "979b7693_6260ebb2",
       "range": {
         "startLine": 29,
         "startChar": 23,
