@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "09a3cb48_4e4f2e0f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-06-30T01:49:42Z",
+      "side": 1,
+      "message": "Currently hardcoded to query and use content providers from USER_SYSTEM for proof of concept",
+      "revId": "d9da18b559898400aaddec8c3ebfe912cac6d72c",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
