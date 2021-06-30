@@ -1,8 +1,10 @@
 package com.stevesoltys.seedvault.ui.storage
 
+import android.content.ContentProvider
 import android.content.Context
 import android.database.Cursor
 import android.graphics.drawable.Drawable
+import android.os.UserHandle
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Root.COLUMN_AVAILABLE_BYTES
 import android.provider.DocumentsContract.Root.COLUMN_DOCUMENT_ID
@@ -31,6 +33,12 @@ object StorageRootResolver {
                 while (cursor.moveToNext()) {
                     val root = getStorageRoot(context, authority, cursor)
                     if (root != null) roots.add(root)
+                }
+            }
+            context.contentResolver.query(ContentProvider.maybeAddUserId(rootsUri, UserHandle.USER_SYSTEM), null, null, null, null)?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val root = getStorageRoot(context, authority, cursor)
+                    if (root != null && root.isUsb) roots.add(root)
                 }
             }
         } catch (e: Exception) {
