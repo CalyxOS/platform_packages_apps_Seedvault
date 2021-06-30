@@ -30,7 +30,7 @@ private const val TAG = "SafStoragePlugin"
 
 @Suppress("BlockingMethodInNonBlockingContext")
 public abstract class SafStoragePlugin(
-    private val context: Context,
+    open val context: Context,
 ) : StoragePlugin {
 
     private val cache = SafCache()
@@ -55,8 +55,6 @@ public abstract class SafStoragePlugin(
             }
             return cache.currentFolder
         }
-
-    private val contentResolver = context.contentResolver
 
     private fun timestampToSnapshot(timestamp: Long): String {
         return "$timestamp.SeedSnap"
@@ -153,7 +151,7 @@ public abstract class SafStoragePlugin(
         val name = timestampToSnapshot(timestamp)
         // TODO should we check if it exists first?
         val snapshotFile = folder.createFileOrThrow(name, MIME_TYPE)
-        return snapshotFile.getOutputStream(contentResolver)
+        return snapshotFile.getOutputStream(context.contentResolver)
     }
 
     /************************* Restore *******************************/
@@ -188,7 +186,7 @@ public abstract class SafStoragePlugin(
         val snapshotFile = cache.snapshotFiles.getOrElse(storedSnapshot) {
             getFolder(storedSnapshot).findFileBlocking(context, timestampToSnapshot(timestamp))
         } ?: throw IOException("Could not get file for snapshot $timestamp")
-        return snapshotFile.getInputStream(contentResolver)
+        return snapshotFile.getInputStream(context.contentResolver)
     }
 
     @Throws(IOException::class)

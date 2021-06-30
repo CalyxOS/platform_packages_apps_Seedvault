@@ -2,11 +2,13 @@
 
 package com.stevesoltys.seedvault.plugins.saf
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
+import android.os.UserHandle
 import android.provider.DocumentsContract.Document.COLUMN_DOCUMENT_ID
 import android.provider.DocumentsContract.EXTRA_LOADING
 import android.provider.DocumentsContract.buildChildDocumentsUriUsingTree
@@ -40,11 +42,14 @@ const val MIME_TYPE = "application/octet-stream"
 private val TAG = DocumentsStorage::class.java.simpleName
 
 internal class DocumentsStorage(
-    private val context: Context,
+    private val appContext: Context,
     private val settingsManager: SettingsManager,
 ) {
 
-    private val contentResolver = context.contentResolver
+    private val context: Context get() = if (settingsManager.getStorage()?.isUsb == true)
+        appContext.createContextAsUser(UserHandle.SYSTEM, 0) else appContext
+
+    private val contentResolver: ContentResolver get() = context.contentResolver
 
     internal var storage: Storage? = null
         get() {
