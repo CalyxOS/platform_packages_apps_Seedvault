@@ -202,6 +202,24 @@
       "message": "Could we just make a single query or would this make us miss roots?\n\nIs there a way that the second query returns the same results as the first one creating duplicates in the list?\n\nDo we want to make this second query for all authorities or just specific ones?",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "38401a7c_69ee5fff",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-07-01T22:26:23Z",
+      "side": 1,
+      "message": "Answer to the duplicates question - we get a dup of usb in user 0",
+      "parentUuid": "b59b148f_a185fd51",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
