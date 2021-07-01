@@ -34,6 +34,23 @@
       "parentUuid": "2311fa0f_6be88056",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "551c6875_5ecb40e0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-07-01T11:35:39Z",
+      "side": 1,
+      "message": "Well, I can think of one option but I don\u0027t know what it would look like. Could try figuring what is sending the URI with userId all the way down to that frameworks code and see if we can send it without userId while keeping the rest of the usage of the URI with userId?",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
