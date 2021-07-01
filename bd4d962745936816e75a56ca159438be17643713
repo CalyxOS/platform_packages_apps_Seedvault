@@ -16,6 +16,24 @@
       "message": "Now the question becomes: How do we deal with this upstream",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "becc24e6_035c9a6f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-07-01T11:33:49Z",
+      "side": 1,
+      "message": "Yeah, it\u0027s unfortunate that it requires change 4241. Otherwise upstream would be fine with this patch I\u0027d think",
+      "parentUuid": "2311fa0f_6be88056",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
