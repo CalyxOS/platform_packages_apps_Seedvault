@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "bbcf515b_f4b5a141",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-01T19:13:01Z",
+      "side": 1,
+      "message": "Is this something that is supposed to land upstream as well or will this always stay in Calyx\u0027s fork?\n\nIf this is for upstream, it would be could to propose it there first to also benefit from the CI checks there.",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "2311fa0f_6be88056",
@@ -90,6 +107,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "67e9de05_161c7d1f",
+        "filename": "app/src/main/AndroidManifest.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-01T19:13:01Z",
+      "side": 1,
+      "message": "We should add this to the README as well to be consistent with the other permissions.",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "1f8ff3ac_e1085195",
         "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootFetcher.kt",
         "patchSetId": 4
@@ -107,6 +141,47 @@
         "endLine": 54,
         "endChar": 63
       },
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6a17397a_ef31715e",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootFetcher.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-01T19:13:01Z",
+      "side": 1,
+      "message": "Could we always maybe add the user ID? Or why do we only do it for USB? What would happen, if we added it in all cases?\n\nDoes this require another system patch to make this work for USB?\n\nStyle nitpick: Multi-line blocks should be enclosed in curly brackets.",
+      "parentUuid": "1f8ff3ac_e1085195",
+      "range": {
+        "startLine": 53,
+        "startChar": 12,
+        "endLine": 54,
+        "endChar": 63
+      },
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b59b148f_a185fd51",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-01T19:13:01Z",
+      "side": 1,
+      "message": "Could we just make a single query or would this make us miss roots?\n\nIs there a way that the second query returns the same results as the first one creating duplicates in the list?\n\nDo we want to make this second query for all authorities or just specific ones?",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
