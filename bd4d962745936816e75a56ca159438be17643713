@@ -53,6 +53,41 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c7232bf_8e5ca0da",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-07-01T11:39:39Z",
+      "side": 1,
+      "message": "It\u0027d also help with LineageOS the userdebug/eng change.",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "36f041b6_0e56536a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-07-01T11:39:39Z",
+      "side": 1,
+      "message": "A cleaner option might be to have some sort of BuildConfig file that this then checks against.\n\nUpstream has a default BuildConfig file with this set to false, so the code becomes a no-op\nWe have our own file (say in src_calyx) where it is set to true.\n\nSomething like https://github.com/LineageOS/android_packages_apps_Etar/blob/lineage-18.1/src_aosp/ws/xsoh/etar/BuildConfig.java",
+      "parentUuid": "551c6875_5ecb40e0",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1f8ff3ac_e1085195",
