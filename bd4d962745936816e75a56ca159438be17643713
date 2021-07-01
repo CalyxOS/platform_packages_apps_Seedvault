@@ -51,6 +51,29 @@
       "message": "Well, I can think of one option but I don\u0027t know what it would look like. Could try figuring what is sending the URI with userId all the way down to that frameworks code and see if we can send it without userId while keeping the rest of the usage of the URI with userId?",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f8ff3ac_e1085195",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootFetcher.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-07-01T11:38:59Z",
+      "side": 1,
+      "message": "https://github.com/seedvault-app/seedvault/blob/master/app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootsFragment.kt#L113\nThis is the URI that causes trouble in https://review.calyxos.org/c/CalyxOS/platform_frameworks_base/+/4241\nWe need the user id for other parts of the android code but it must not be present for the authority comparison",
+      "range": {
+        "startLine": 53,
+        "startChar": 12,
+        "endLine": 54,
+        "endChar": 63
+      },
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
