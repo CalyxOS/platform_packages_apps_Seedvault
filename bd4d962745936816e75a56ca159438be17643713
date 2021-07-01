@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2311fa0f_6be88056",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-07-01T09:41:38Z",
+      "side": 1,
+      "message": "Now the question becomes: How do we deal with this upstream",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
