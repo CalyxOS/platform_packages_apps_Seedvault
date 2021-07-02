@@ -189,6 +189,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "832015aa_457aa0b3",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootFetcher.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-07-02T18:55:11Z",
+      "side": 1,
+      "message": "We only do it for USB since USB is only available to user 0 and this makes it available to other users as well. Adding user ID in all cases shouldn\u0027t hurt but we still need USB available which means hardcoding user 0 for it",
+      "parentUuid": "6a17397a_ef31715e",
+      "range": {
+        "startLine": 53,
+        "startChar": 12,
+        "endLine": 54,
+        "endChar": 63
+      },
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b59b148f_a185fd51",
         "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
         "patchSetId": 4
@@ -218,6 +242,24 @@
       "side": 1,
       "message": "Answer to the duplicates question - we get a dup of usb in user 0",
       "parentUuid": "b59b148f_a185fd51",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c881e646_14823b7e",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-07-02T18:55:11Z",
+      "side": 1,
+      "message": "We want the second query to make USB available for secondary users. It is duplicating it in user 0 since USB is already being added in the first query. Could huard the second query with a  user ID check",
+      "parentUuid": "38401a7c_69ee5fff",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
