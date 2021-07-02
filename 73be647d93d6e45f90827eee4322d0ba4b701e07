@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "49615801_2841842f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-07-02T19:14:38Z",
+      "side": 1,
+      "message": "Duplicate USB entry in user 0 is now handled",
+      "revId": "73be647d93d6e45f90827eee4322d0ba4b701e07",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
