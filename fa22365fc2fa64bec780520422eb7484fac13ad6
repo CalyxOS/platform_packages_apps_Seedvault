@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d69899b1_36c41a25",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-07-20T18:16:14Z",
+      "side": 1,
+      "message": "This could use additional checks, but F-Droid is a system app and should always be present unless somebody disables it, which is not recommended at all.",
+      "revId": "fa22365fc2fa64bec780520422eb7484fac13ad6",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
