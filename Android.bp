@@ -33,6 +33,7 @@ android_app {
         "androidx-constraintlayout_constraintlayout",
         "com.google.android.material_material",
         "setupcompat",
+        "setupdesign",
         // storage backup lib
         "seedvault-lib-storage",
         // koin
