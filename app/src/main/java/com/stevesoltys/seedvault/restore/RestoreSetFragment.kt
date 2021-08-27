@@ -1,5 +1,6 @@
 package com.stevesoltys.seedvault.restore
 
+import android.app.Activity.RESULT_FIRST_USER
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +22,7 @@ class RestoreSetFragment : Fragment() {
     private lateinit var listView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var errorView: TextView
-    private lateinit var skipView: TextView
+    private lateinit var skipView: Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +51,10 @@ class RestoreSetFragment : Fragment() {
 
         skipView.setOnClickListener {
             viewModel.onFinishClickedAfterRestoringAppData()
+            // Equivalent to com.google.android.setupcompat.util.ResultCodes.RESULT_SKIP
+            // SetupWizard handles this
+            requireActivity().setResult(RESULT_FIRST_USER)
+            requireActivity().finishAfterTransition()
         }
     }
 
