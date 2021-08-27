@@ -1,6 +1,6 @@
 package com.stevesoltys.seedvault.restore
 
-import android.app.Activity.RESULT_OK
+import android.app.Activity.RESULT_FIRST_USER
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +34,9 @@ internal class RestoreFilesFragment : SnapshotFragment() {
         val skipView: TextView = footer.findViewById(R.id.skipView)
         skipView.setOnClickListener {
             requireActivity().apply {
-                setResult(RESULT_OK)
+                // Equivalent to com.google.android.setupcompat.util.ResultCodes.RESULT_SKIP
+                // SetupWizard handles this
+                setResult(RESULT_FIRST_USER)
                 finishAfterTransition()
             }
         }
