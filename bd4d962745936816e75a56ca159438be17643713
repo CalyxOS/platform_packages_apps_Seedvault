@@ -38,6 +38,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "04aad6f0_5a926c9f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-09-02T10:20:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a9bf389f_f0a78ea9",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "2311fa0f_6be88056",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 4
@@ -136,6 +154,24 @@
       "writtenOn": "2021-07-01T19:13:01Z",
       "side": 1,
       "message": "We should add this to the README as well to be consistent with the other permissions.",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc9f4c0c_55e91eb4",
+        "filename": "app/src/main/AndroidManifest.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-09-02T10:20:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "67e9de05_161c7d1f",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
@@ -260,6 +296,24 @@
       "side": 1,
       "message": "We want the second query to make USB available for secondary users. It is duplicating it in user 0 since USB is already being added in the first query. Could huard the second query with a  user ID check",
       "parentUuid": "38401a7c_69ee5fff",
+      "revId": "bd4d962745936816e75a56ca159438be17643713",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "da689aa8_fa0eb677",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-09-02T10:20:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c881e646_14823b7e",
       "revId": "bd4d962745936816e75a56ca159438be17643713",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
