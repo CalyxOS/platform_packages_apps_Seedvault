@@ -178,7 +178,6 @@ internal class StorageRootFetcher(private val context: Context, private val isRe
                     val uri = Uri.parse("market://details?id=$NEXTCLOUD_PACKAGE")
                     val i = Intent(ACTION_VIEW, uri)
                     i.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                    i.setPackage("org.fdroid.fdroid")
                     context.startActivity(i)
                 }
             }
