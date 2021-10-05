@@ -5,7 +5,7 @@
     <string name="about_design">Design de : <a href="https://www.glennsorrentino.com/">Glenn Sorrentino</a></string>
     <string name="about_author">Écrit par : <a href="https://github.com/stevesoltys">Steve Soltys</a> et <a href="https://blog.grobox.de">Torsten Grote</a></string>
     <string name="about_license">Licence : <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache2</a></string>
-    <string name="about_source_code">Code source : https://github.com/stevesoltys/seedvault</string>
+    <string name="about_source_code">Code source : https://github.com/seedvault-app/seedvault</string>
     <string name="about_sponsor">Parrainé par : <a href="https://www.calyxinstitute.org">Calyx Institute</a> pour usage dans <a href="https://calyxos.org">CalyxOS</a></string>
     <string name="storage_internal_warning_use_anyway">Utiliser quand même</string>
     <string name="about_title">À propos</string>
@@ -16,7 +16,7 @@
     <string name="notification_error_action">Réparer</string>
     <string name="notification_channel_title">Notification de la sauvegarde</string>
     <string name="recovery_code_error_checksum_word">Votre code est invalide. Veuillez vérifier tous les mots et réessayer !</string>
-    <string name="recovery_code_error_invalid_word">Mot erroné. Vouliez-vous dire %1$s ou %2$s \?</string>
+    <string name="recovery_code_error_invalid_word">Mot erroné.</string>
     <string name="recovery_code_error_empty_word">Vous avez oublié d’entrer ce mot.</string>
     <string name="recovery_code_input_hint_12">Mot 12</string>
     <string name="recovery_code_input_hint_11">Mot 11</string>

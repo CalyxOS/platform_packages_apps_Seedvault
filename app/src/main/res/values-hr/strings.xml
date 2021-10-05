@@ -2,7 +2,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_success_text">Sigurnosne kopije spremljene za %1$d od %2$d aplikacija. Dodirni i saznaj više.</string>
     <string name="notification_backup_already_running">Spremanje sigurnosne kopije je u tijeku</string>
-    <string name="about_source_code">Izvorni kod: https://github.com/stevesoltys/seedvault</string>
+    <string name="about_source_code">Izvorni kod: https://github.com/seedvault-app/seedvault</string>
     <string name="about_sponsor">Sponsor: <a href="https://www.calyxinstitute.org">Calyx Institute</a> za upotrebu u sustavu <a href="https://calyxos.org">CalyxOS</a></string>
     <string name="about_design">Dizajn: <a href="https://www.glennsorrentino.com/">Glenn Sorrentino</a></string>
     <string name="about_author">Autori: <a href="https://github.com/stevesoltys">Steve Soltys</a> i <a href="https://blog.grobox.de">Torsten Grote</a></string>
@@ -49,7 +49,7 @@
     <string name="notification_title">Sigurnosna kopija pokrenuta</string>
     <string name="notification_channel_title">Obavijest sigurnosne kopije</string>
     <string name="recovery_code_error_checksum_word">Tvoja lozinka je neispravna. Provjeri sve riječi i pokušaj ponovo!</string>
-    <string name="recovery_code_error_invalid_word">Kriva riječ. Je li misliš %1$s ili %2$s\?</string>
+    <string name="recovery_code_error_invalid_word">Kriva riječ.</string>
     <string name="recovery_code_error_empty_word">Ova riječ nije upisana.</string>
     <string name="recovery_code_input_hint_12">Riječ 12</string>
     <string name="recovery_code_input_hint_11">Riječ 11</string>
