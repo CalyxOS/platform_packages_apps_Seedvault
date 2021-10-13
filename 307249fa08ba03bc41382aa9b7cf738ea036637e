@@ -16,6 +16,23 @@
       "message": "TODO: 4628: Restore: Always use F-Droid to install Nextcloud | https://review.calyxos.org/c/CalyxOS/platform_packages_apps_Seedvault/+/4628",
       "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "da818a9e_ee69594d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-10-13T16:51:13Z",
+      "side": 1,
+      "message": "After we rename f-droid, this is how it would look:\n\nUpgrades / existing users / our installs: org.fdroid.fdroid package name remains, to keep app data.\nNew installs: org.calyxos.fdroid new package will be used for fresh installs.\n\nDoes this change look ok? Thoughts?",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
