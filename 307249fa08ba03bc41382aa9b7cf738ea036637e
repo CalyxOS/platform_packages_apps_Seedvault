@@ -50,6 +50,24 @@
       "message": "We would only rename the app but not privext?\n\nNot sure about setting installers from privext to our app if it is used by ours and the official one?\nMaybe with 12 we don\u0027t need privext anymore at all?",
       "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6544cc05_ad742278",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/restore/install/InstallIntentCreator.kt",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-10-14T12:45:03Z",
+      "side": 1,
+      "message": "To keep things simpler. I guess we could rename privext, but it\u0027s not needed.\n\nOur privext will only support our app for now.\n\nAs for 12 we still need privext\n1. Silent installs / uninstalls aren\u0027t allowed, only upgrades.\n2. F-Droid still can\u0027t do that, it doesn\u0027t use the new APIs, but that\u0027s something we can implement.",
+      "parentUuid": "98327cad_52dc0b3e",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
