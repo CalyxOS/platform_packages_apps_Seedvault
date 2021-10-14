@@ -33,6 +33,23 @@
       "message": "After we rename f-droid, this is how it would look:\n\nUpgrades / existing users / our installs: org.fdroid.fdroid package name remains, to keep app data.\nNew installs: org.calyxos.fdroid new package will be used for fresh installs.\n\nDoes this change look ok? Thoughts?",
       "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "98327cad_52dc0b3e",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/restore/install/InstallIntentCreator.kt",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-14T12:40:04Z",
+      "side": 1,
+      "message": "We would only rename the app but not privext?\n\nNot sure about setting installers from privext to our app if it is used by ours and the official one?\nMaybe with 12 we don\u0027t need privext anymore at all?",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
