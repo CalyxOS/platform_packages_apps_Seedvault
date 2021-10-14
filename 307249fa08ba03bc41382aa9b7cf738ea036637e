@@ -35,6 +35,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa808210_e017ab09",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-14T18:27:01Z",
+      "side": 1,
+      "message": "If \"Upgrades / existing users / our installs\" keep the `org.fdroid.fdroid` package name, then this patch will fail in a way that it crashes Seedvault when `org.calyxos.fdroid` is not installed. If we apply the patch from 12, it won\u0027t crash, but still fail to allow installs.\n\nHowever, we only support restore from SUW which is a new install, so considering this, it would be fine again.",
+      "parentUuid": "da818a9e_ee69594d",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "98327cad_52dc0b3e",
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "To keep things simpler. I guess we could rename privext, but it\u0027s not needed.\n\nOur privext will only support our app for now.\n\nAs for 12 we still need privext\n1. Silent installs / uninstalls aren\u0027t allowed, only upgrades.\n2. F-Droid still can\u0027t do that, it doesn\u0027t use the new APIs, but that\u0027s something we can implement.",
       "parentUuid": "98327cad_52dc0b3e",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5828d6a0_76fcd8e1",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/restore/install/InstallIntentCreator.kt",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-14T18:27:01Z",
+      "side": 1,
+      "message": "Ahh so privext is signed with our key anyway, so it is only confusing that it retains the old package name.\n\nAs for 12, do we really need Silent installs and uninstalls? One could argue updates are enough.",
+      "parentUuid": "6544cc05_ad742278",
       "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
