@@ -53,6 +53,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f6e1041b_2796e77e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-10-15T16:23:59Z",
+      "side": 1,
+      "message": "Wrt the last bit - work profiles complicate that.\n\nExisting users / upgrades would keep `org.fdroid.fdroid` - and if they don\u0027t have a work profile setup, when they create a new one, they\u0027re allowed to restore. You can also call RESTORE from Dialer now.\n\n\nIt\u0027s solvable, but it\u0027ll just need some code changes rather than just a simple text substituion.\n\nWe handled this for the Ripple / Panic Trigger rename, https://review.calyxos.org/c/CalyxOS/platform_frameworks_base/+/2248/7/packages/SystemUI/src/com/android/systemui/globalactions/GlobalActionsDialog.java\nhttps://review.calyxos.org/c/CalyxOS/platform_frameworks_base/+/3445/3/packages/SystemUI/src/com/android/systemui/globalactions/GlobalActionsDialog.java",
+      "parentUuid": "fa808210_e017ab09",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "98327cad_52dc0b3e",
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "Ahh so privext is signed with our key anyway, so it is only confusing that it retains the old package name.\n\nAs for 12, do we really need Silent installs and uninstalls? One could argue updates are enough.",
       "parentUuid": "6544cc05_ad742278",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "31780b0b_bba865bd",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/restore/install/InstallIntentCreator.kt",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-10-15T16:23:59Z",
+      "side": 1,
+      "message": "I guess we could rename it. That one is easy since it has no data.\n\nFor 12, yeah we do. Panic relies on silent uninstalls.",
+      "parentUuid": "5828d6a0_76fcd8e1",
       "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
