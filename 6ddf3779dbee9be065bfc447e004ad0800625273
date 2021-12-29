@@ -16,6 +16,23 @@
       "message": "This is only being used for RESULT_SKIP - I\u0027d rather add that here than have to add a new dep, to make the gradle build easier.",
       "revId": "6ddf3779dbee9be065bfc447e004ad0800625273",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7393831c_5ebb48bb",
+        "filename": "app/src/main/res/values/strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-12-29T21:33:07Z",
+      "side": 1,
+      "message": "What about translations?",
+      "revId": "6ddf3779dbee9be065bfc447e004ad0800625273",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
