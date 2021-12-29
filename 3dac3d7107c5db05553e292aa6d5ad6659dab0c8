@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bbc8d493_91946778",
+        "filename": "Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-12-29T21:29:00Z",
+      "side": 1,
+      "message": "This is only being used for https://cs.android.com/android/platform/superproject/+/master:frameworks/base/packages/SettingsLib/src/com/android/settingslib/Utils.java;l\u003d234?q\u003dUtils.getColorAccent\u0026sq\u003d\n\nI\u0027d rather import that (and getColorAttr) here than add a dependency on SettingsLib.\n\nFrom previous experience that\u0027s not easy to add to gradle build, it required manual editing.\n\n3627: Add new dependency, SettingsLib | https://review.calyxos.org/c/CalyxOS/platform_packages_apps_Firewall/+/3627",
+      "revId": "3dac3d7107c5db05553e292aa6d5ad6659dab0c8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae4155cc_e7c6cc89",
+        "filename": "Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-12-29T21:29:00Z",
+      "side": 1,
+      "message": "I guess this we\u0027ll have to add properly as a gradle dep, can do it like the other aosp deps we have.",
+      "revId": "3dac3d7107c5db05553e292aa6d5ad6659dab0c8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
