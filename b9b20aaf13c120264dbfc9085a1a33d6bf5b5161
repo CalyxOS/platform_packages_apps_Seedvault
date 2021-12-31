@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7db99d9d_d35cc7df",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-12-31T23:33:05Z",
+      "side": 1,
+      "message": "Chain sent upstream, https://github.com/seedvault-app/seedvault/pull/353\n\nunfortunately gradle build fails to find `SudThemeGlifV3.Light` 😞",
+      "revId": "b9b20aaf13c120264dbfc9085a1a33d6bf5b5161",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}

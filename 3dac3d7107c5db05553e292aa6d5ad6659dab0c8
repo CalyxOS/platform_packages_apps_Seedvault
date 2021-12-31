@@ -51,6 +51,24 @@
       "message": "I guess this we\u0027ll have to add properly as a gradle dep, can do it like the other aosp deps we have.",
       "revId": "3dac3d7107c5db05553e292aa6d5ad6659dab0c8",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f506815_00cbeea8",
+        "filename": "Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-12-31T23:33:05Z",
+      "side": 1,
+      "message": "Added",
+      "parentUuid": "ae4155cc_e7c6cc89",
+      "revId": "3dac3d7107c5db05553e292aa6d5ad6659dab0c8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
