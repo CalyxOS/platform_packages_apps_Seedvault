@@ -18,6 +18,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f52d657_c8638664",
+        "filename": "Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-12-31T22:27:00Z",
+      "side": 1,
+      "message": "Java to Kotlin conversion even for a tiny function wasn\u0027t fun, but done.\n\nDependency removed, code added to UiUtils.kt",
+      "parentUuid": "bbc8d493_91946778",
+      "revId": "3dac3d7107c5db05553e292aa6d5ad6659dab0c8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ae4155cc_e7c6cc89",
