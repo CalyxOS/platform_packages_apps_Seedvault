@@ -22,6 +22,30 @@
       },
       "revId": "b491e52d05e91d66f261698279f9f9a505be040d",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd7a5c8e_5584dd11",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/restore/RestoreSetFragment.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-04T20:43:36Z",
+      "side": 1,
+      "message": "Ahh that\u0027s what you meant.",
+      "parentUuid": "62035b7c_96246d80",
+      "range": {
+        "startLine": 25,
+        "startChar": 35,
+        "endLine": 25,
+        "endChar": 41
+      },
+      "revId": "b491e52d05e91d66f261698279f9f9a505be040d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
