@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ddde4266_9a80c65f",
+        "filename": "app/src/main/res/layout/fragment_restore_files_started.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2022-01-04T16:28:59Z",
+      "side": 1,
+      "message": "Newline",
+      "revId": "d0169c56a76f7c3f1cdb9b2c2734746e3ca57e78",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "96bdd7fe_6452df0b",
+        "filename": "app/src/main/res/layout/fragment_storage_check.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2022-01-04T16:28:59Z",
+      "side": 1,
+      "message": "Newline",
+      "revId": "d0169c56a76f7c3f1cdb9b2c2734746e3ca57e78",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
