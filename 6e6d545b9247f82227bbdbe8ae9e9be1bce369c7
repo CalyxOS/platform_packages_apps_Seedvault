@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab20b24a_d713205a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-04T16:25:13Z",
+      "side": 1,
+      "message": "Fixes activity being shown twice on skip.\n\nMerged upstream",
+      "revId": "6e6d545b9247f82227bbdbe8ae9e9be1bce369c7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
