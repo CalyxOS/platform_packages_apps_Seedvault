@@ -51,6 +51,24 @@
       "message": "What about translations?",
       "revId": "6ddf3779dbee9be065bfc447e004ad0800625273",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f75e0e6_009feb51",
+        "filename": "app/src/main/res/values/strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2022-01-04T16:26:57Z",
+      "side": 1,
+      "message": "restore_skip needs to be removed or renamed in translations",
+      "parentUuid": "7393831c_5ebb48bb",
+      "revId": "6ddf3779dbee9be065bfc447e004ad0800625273",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
