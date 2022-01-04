@@ -36,6 +36,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "985494f5_8300fcf6",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/RequireProvisioningActivity.kt",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-04T19:22:17Z",
+      "side": 1,
+      "message": "So this is likely for that, to pass on RESULT_SKIP up there, which then calls onSkipPressed()",
+      "parentUuid": "fc70e88e_592b2afe",
+      "revId": "b9c5aa7c24014d0720e38b8f3cafe251b09e5465",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "62fc4249_1c848b67",
@@ -67,6 +85,24 @@
       "side": 1,
       "message": "315577: SUW: restore: Handle RESULT_SKIP from Seedvault | https://review.lineageos.org/c/LineageOS/android_packages_apps_SetupWizard/+/315577",
       "parentUuid": "62fc4249_1c848b67",
+      "revId": "b9c5aa7c24014d0720e38b8f3cafe251b09e5465",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d6c63645_d48a8f37",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootsFragment.kt",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-04T19:22:17Z",
+      "side": 1,
+      "message": "Comment added.",
+      "parentUuid": "a54eaa38_f9dc069e",
       "revId": "b9c5aa7c24014d0720e38b8f3cafe251b09e5465",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
