@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9ba40bea_931ffff5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-14T17:41:06Z",
+      "side": 1,
+      "message": "I revert and re-apply every time this changes upstream to keep things clean / easier to rebase.",
+      "revId": "4a7f754fd530e85ab552f61fa0eb816a9feceb30",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
