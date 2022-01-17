@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ba30acd3_b49f2eb4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-17T21:58:22Z",
+      "side": 1,
+      "message": "Works as expected and does not require any OS changes. Can fill in the commit description after some feedback",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
