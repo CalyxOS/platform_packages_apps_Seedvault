@@ -16,6 +16,74 @@
       "message": "Works as expected and does not require any OS changes. Can fill in the commit description after some feedback",
       "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e05c9623_eae7be6f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-17T22:49:08Z",
+      "side": 1,
+      "message": "Great that it works without OS changes.\n\nShould send PR to github",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4486d582_33a46ca5",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-17T22:49:08Z",
+      "side": 1,
+      "message": "I think the mContext member variable naming is a java thing, and so we should probably use a different name.",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7adda078_aa6a9c74",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-17T22:49:08Z",
+      "side": 1,
+      "message": "Looks like this is the secret sauce. very interesting.",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "773e3bb9_fb5ff9d7",
+        "filename": "gradle/wrapper/gradle-wrapper.properties",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-01-17T22:49:08Z",
+      "side": 1,
+      "message": "Do not make unrelated changes, especially don\u0027t let Studio override things.\n\nWe want to keep sha256sum, so get rid of this change, and when it warns you, just pick \u0027use sha256sum\u0027",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
