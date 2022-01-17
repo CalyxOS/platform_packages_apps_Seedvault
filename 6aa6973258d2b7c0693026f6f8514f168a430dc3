@@ -54,6 +54,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "4be93510_515e2d6d",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-17T23:06:03Z",
+      "side": 1,
+      "message": "Yeah I\u0027m not super familiar with kotlin conventions",
+      "parentUuid": "4486d582_33a46ca5",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7adda078_aa6a9c74",
         "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
         "patchSetId": 4
@@ -71,6 +89,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6118f1b4_742dcea1",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-17T23:06:03Z",
+      "side": 1,
+      "message": "Yeah, the content resolvers are obtained from the context. Getting the context of other users gives us access to other users\u0027 content resolvers without having to mess with the Uri directly (which frameworks didn\u0027t like)",
+      "parentUuid": "7adda078_aa6a9c74",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "773e3bb9_fb5ff9d7",
         "filename": "gradle/wrapper/gradle-wrapper.properties",
         "patchSetId": 4
@@ -82,6 +118,24 @@
       "writtenOn": "2022-01-17T22:49:08Z",
       "side": 1,
       "message": "Do not make unrelated changes, especially don\u0027t let Studio override things.\n\nWe want to keep sha256sum, so get rid of this change, and when it warns you, just pick \u0027use sha256sum\u0027",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f96e27e_a85f3629",
+        "filename": "gradle/wrapper/gradle-wrapper.properties",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-17T23:06:03Z",
+      "side": 1,
+      "message": "Yeah sorry, didn\u0027t mean to upload that",
+      "parentUuid": "773e3bb9_fb5ff9d7",
       "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
