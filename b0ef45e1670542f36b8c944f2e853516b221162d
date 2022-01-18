@@ -156,6 +156,24 @@
       "parentUuid": "d0cc7620_c62327bc",
       "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7bc34b11_5f897ada",
+        "filename": "storage/lib/src/main/java/org/calyxos/backup/storage/plugin/saf/SafStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T13:18:33Z",
+      "side": 1,
+      "message": "Actually, on latest patchset by overriding the value without storing the initial context we can\u0027t get the correct content resolver for this I believe. We may still need to store context in this class somehow for this case",
+      "parentUuid": "696e7e99_e8b062d3",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
