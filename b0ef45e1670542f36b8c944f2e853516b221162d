@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0ce8c106_7911afca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-18T11:33:01Z",
+      "side": 1,
+      "message": "This looks mostly ok. I just wonder, if this is something for upstream, or only for Calyx.",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ffd7872c_429a9a86",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-18T11:33:01Z",
+      "side": 1,
+      "message": "Do you still need that app context in this class? If not, you can remove the `private val` part.",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "caf5a4e7_6b5ecfe3",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsStorage.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-18T11:33:01Z",
+      "side": 1,
+      "message": "Starting here, all methods below are like static methods. You don\u0027t need to rename the context in those as they use whatever context gets passed in as a parameter.",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4d7592b2_4cad64a0",
+        "filename": "storage/lib/src/main/java/org/calyxos/backup/storage/plugin/saf/SafStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-18T11:33:01Z",
+      "side": 1,
+      "message": "I think the storage library should shouldn\u0027t know about the context hacking you are doing on the consumer side. Another solution that would achieve this is to open the context val and override it in the sub-class.",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0cc7620_c62327bc",
+        "filename": "storage/lib/src/main/java/org/calyxos/backup/storage/plugin/saf/SafStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-18T11:33:01Z",
+      "side": 1,
+      "message": "Are you sure you want this? Won\u0027t this get the ANDROID_ID of the main user for the work profile, thus having files from both landing in the same storage folder, messing stuff up?",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}

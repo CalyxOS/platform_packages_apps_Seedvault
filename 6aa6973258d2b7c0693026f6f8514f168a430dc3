@@ -72,6 +72,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a01665af_08dd50af",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-18T11:33:01Z",
+      "side": 1,
+      "message": "Yeah I\u0027d choose a different name, maybe even one that makes clear that this might not be the normal app context which might be important in some cases. `systemUserContext`?\n\nAnother option that would also reduce diff size is to rename the old context to `appContext` and leave the new one as `context`.",
+      "parentUuid": "4be93510_515e2d6d",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7adda078_aa6a9c74",
         "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
         "patchSetId": 4
