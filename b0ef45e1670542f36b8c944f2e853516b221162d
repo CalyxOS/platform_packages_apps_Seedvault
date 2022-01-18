@@ -35,6 +35,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7b8b99a_9e7e1a33",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T13:04:06Z",
+      "side": 1,
+      "message": "Doesn\u0027t seem to want to compile without it",
+      "parentUuid": "ffd7872c_429a9a86",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "caf5a4e7_6b5ecfe3",
@@ -48,6 +66,24 @@
       "writtenOn": "2022-01-18T11:33:01Z",
       "side": 1,
       "message": "Starting here, all methods below are like static methods. You don\u0027t need to rename the context in those as they use whatever context gets passed in as a parameter.",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "32ac2166_800bdb0e",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsStorage.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T13:04:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "caf5a4e7_6b5ecfe3",
       "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
@@ -69,6 +105,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2198a17c_e93f2ace",
+        "filename": "storage/lib/src/main/java/org/calyxos/backup/storage/plugin/saf/SafStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T13:04:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d7592b2_4cad64a0",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d0cc7620_c62327bc",
@@ -82,6 +136,24 @@
       "writtenOn": "2022-01-18T11:33:01Z",
       "side": 1,
       "message": "Are you sure you want this? Won\u0027t this get the ANDROID_ID of the main user for the work profile, thus having files from both landing in the same storage folder, messing stuff up?",
+      "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "696e7e99_e8b062d3",
+        "filename": "storage/lib/src/main/java/org/calyxos/backup/storage/plugin/saf/SafStoragePlugin.kt",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T13:04:06Z",
+      "side": 1,
+      "message": "Yeah, this one should not be changed. Need to keep an eye out for other contexts that should not be modified.",
+      "parentUuid": "d0cc7620_c62327bc",
       "revId": "b0ef45e1670542f36b8c944f2e853516b221162d",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
