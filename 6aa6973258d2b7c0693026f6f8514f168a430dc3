@@ -105,6 +105,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bedf47ad_f690f17e",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T09:22:04Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6118f1b4_742dcea1",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "773e3bb9_fb5ff9d7",
@@ -136,6 +154,24 @@
       "side": 1,
       "message": "Yeah sorry, didn\u0027t mean to upload that",
       "parentUuid": "773e3bb9_fb5ff9d7",
+      "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "de400d67_46152cd6",
+        "filename": "gradle/wrapper/gradle-wrapper.properties",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-01-18T09:22:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f96e27e_a85f3629",
       "revId": "6aa6973258d2b7c0693026f6f8514f168a430dc3",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
