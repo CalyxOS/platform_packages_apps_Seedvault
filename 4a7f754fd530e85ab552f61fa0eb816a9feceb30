@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7495b2e_0017b300",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/RestoreStorageViewModel.kt",
+        "patchSetId": 7
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-24T14:41:28Z",
+      "side": 0,
+      "message": "What\u0027s the reason for moving this up?",
+      "revId": "4a7f754fd530e85ab552f61fa0eb816a9feceb30",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "63a04868_a4d65a55",
+        "filename": "storage/lib/src/main/java/org/calyxos/backup/storage/plugin/saf/SafStoragePlugin.kt",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-01-24T14:41:28Z",
+      "side": 0,
+      "message": "Could keep this in, but base it on configurableContext.",
+      "revId": "4a7f754fd530e85ab552f61fa0eb816a9feceb30",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
