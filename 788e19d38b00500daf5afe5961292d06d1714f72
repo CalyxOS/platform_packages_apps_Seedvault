@@ -35,6 +35,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a048e687_92511000",
+        "filename": "README.md",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-02-09T14:23:39Z",
+      "side": 1,
+      "message": "Added optional, but \"storage roots\" is also used in MANAGE_DOCUMENTS",
+      "parentUuid": "a00f0c5a_e33662b4",
+      "revId": "788e19d38b00500daf5afe5961292d06d1714f72",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b974100b_f537830c",
@@ -48,6 +66,24 @@
       "writtenOn": "2022-01-24T14:41:28Z",
       "side": 1,
       "message": "For upstreaming, it would be nice, if this were conditional to whether INTERACT_ACROSS_USERS_FULL is granted.\n\nTo prevent code duplication and to get rid of these unresolved reference errors out of these classes, you could define an extension function on Context.\n\nE.g. in App.kt\n\n```\nfun Context.getSystemContext(isUsbStorage: () -\u003e Boolean): Context {\n    // TODO check if INTERACT_ACROSS_USERS_FULL is granted\n    return if (isUsbStorage()) createContextAsUser(UserHandle.SYSTEM, 0) else this\n}\n```\n\nThen you can do this here:\n\n```\n    private val context: Context get() \u003d appContext.getSystemContext {\n        storage.storage?.isUsb \u003d\u003d true\n    }\n```",
+      "revId": "788e19d38b00500daf5afe5961292d06d1714f72",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b29c6a56_1462d5e9",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/plugins/saf/DocumentsProviderStoragePlugin.kt",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-02-09T14:23:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b974100b_f537830c",
       "revId": "788e19d38b00500daf5afe5961292d06d1714f72",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
@@ -86,6 +122,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9337e114_8f6e171d",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-02-09T14:23:39Z",
+      "side": 1,
+      "message": "I haven\u0027t tried in some time but I do remember exceptions being thrown without the permission being granted. I would expect the permission to catch it. It would be a rather big security hole in Android if it was this easy to query stuff in other users.",
+      "parentUuid": "bc643c06_fbc151d2",
+      "revId": "788e19d38b00500daf5afe5961292d06d1714f72",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "792cebef_7752632d",
@@ -99,6 +153,24 @@
       "writtenOn": "2022-01-24T14:41:28Z",
       "side": 1,
       "message": "Could you please do the following here to limit the fallout of the unresolved reference errors for system APIs? (also nicer formatting)\n\n```\n                val c: Context \u003d context.createContextAsUser(UserHandle.SYSTEM, 0)\n                c.contentResolver.query(rootsUri, null, null, null, null)?.use { cursor -\u003e\n```\n\nMaybe also add a comment about what is happening here.",
+      "revId": "788e19d38b00500daf5afe5961292d06d1714f72",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e9a9ce29_09fa849b",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/ui/storage/StorageRootResolver.kt",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2022-02-09T14:23:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "792cebef_7752632d",
       "revId": "788e19d38b00500daf5afe5961292d06d1714f72",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
