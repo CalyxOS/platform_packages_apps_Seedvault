@@ -140,6 +140,24 @@
       "parentUuid": "5828d6a0_76fcd8e1",
       "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0e701d6c_2c744604",
+        "filename": "app/src/main/java/com/stevesoltys/seedvault/restore/install/InstallIntentCreator.kt",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-02-19T18:48:22Z",
+      "side": 1,
+      "message": "Will rename privext, should be easy. Old name also won\u0027t be kept so it\u0027ll be a pain-free transition, just an extra line.\n\nWe\u0027ll also still need the privext for a while either way since the new silent updates API is only available to apps with targetSdk \u003e\u003d 31, which f-droid isn\u0027t yet.",
+      "parentUuid": "31780b0b_bba865bd",
+      "revId": "307249fa08ba03bc41382aa9b7cf738ea036637e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
