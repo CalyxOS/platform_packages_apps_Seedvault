@@ -16,6 +16,23 @@
       "message": "Now that it\u0027s a PR, no need to update this change, we\u0027ll get the updates once it\u0027s merged upstream and we merge seedvault downstream.",
       "revId": "9022291b52538f68c9271126d190ef118e084eef",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e9a16c4c_014d4484",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-03-22T18:15:24Z",
+      "side": 1,
+      "message": "This has to be kept open still since it has the same Change-Id\n\nGerrit will update this change the next time we pull upstream.\n\nAbandoning now will make that fail, so just leave this untouched for now.",
+      "revId": "9022291b52538f68c9271126d190ef118e084eef",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
