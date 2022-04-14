@@ -11,6 +11,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_INSTRUMENTATION
 import android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
+import android.os.Build
 import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
@@ -159,7 +160,8 @@ internal fun PackageInfo.isSystemApp(): Boolean {
 
 internal fun PackageInfo.allowsBackup(): Boolean {
     if (packageName == MAGIC_PACKAGE_MANAGER || applicationInfo == null) return false
-    return applicationInfo.flags and FLAG_ALLOW_BACKUP != 0
+    return (applicationInfo.flags and FLAG_ALLOW_BACKUP != 0) &&
+        (applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O) // S
 }
 
 /**
