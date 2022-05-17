@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "823f51ac_74c06652",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-05-17T10:09:24Z",
+      "side": 1,
+      "message": "https://github.com/seedvault-app/seedvault/pull/402",
+      "revId": "ed996e63db77e1e3bd22c5c743f96ab2ff885739",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
