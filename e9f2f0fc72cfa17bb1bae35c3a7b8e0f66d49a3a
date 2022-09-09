@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0c5842e_7ecdbca7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-09T12:33:53Z",
+      "side": 1,
+      "message": "`git pull --no-edit --log $(cat .gitupstream)`",
+      "revId": "e9f2f0fc72cfa17bb1bae35c3a7b8e0f66d49a3a",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
