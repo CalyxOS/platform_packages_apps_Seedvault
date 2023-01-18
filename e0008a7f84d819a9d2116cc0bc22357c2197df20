@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3e259c7f_25cc31b4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-01-18T14:24:28Z",
+      "side": 1,
+      "message": "Hold, dependent fw/b change (same Change-Id) WIP.",
+      "revId": "e0008a7f84d819a9d2116cc0bc22357c2197df20",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
