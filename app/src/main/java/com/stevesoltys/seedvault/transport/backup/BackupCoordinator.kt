@@ -425,8 +425,7 @@ internal class BackupCoordinator(
             val packageName = packageInfo.packageName
             try {
                 nm.onOptOutAppBackup(packageName, i + 1, notBackedUpPackages.size)
-                val packageState =
-                    if (packageInfo.isStopped()) WAS_STOPPED else NOT_ALLOWED
+                val packageState = NOT_ALLOWED
                 val wasBackedUp = backUpApk(packageInfo, packageState)
                 if (!wasBackedUp) {
                     val packageMetadata =

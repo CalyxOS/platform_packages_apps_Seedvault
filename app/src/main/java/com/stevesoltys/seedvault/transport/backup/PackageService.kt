@@ -175,13 +175,7 @@ internal fun PackageInfo.isNotUpdatedSystemApp(): Boolean {
 
 internal fun PackageInfo.doesNotGetBackedUp(): Boolean {
     if (packageName == MAGIC_PACKAGE_MANAGER || applicationInfo == null) return true
-    return applicationInfo.flags and FLAG_ALLOW_BACKUP == 0 || // does not allow backup
-        applicationInfo.flags and FLAG_STOPPED != 0 // is stopped
-}
-
-internal fun PackageInfo.isStopped(): Boolean {
-    if (packageName == MAGIC_PACKAGE_MANAGER || applicationInfo == null) return false
-    return applicationInfo.flags and FLAG_STOPPED != 0
+    return applicationInfo.flags and FLAG_ALLOW_BACKUP == 0 // does not allow backup
 }
 
 internal fun PackageInfo.isTestOnly(): Boolean {
