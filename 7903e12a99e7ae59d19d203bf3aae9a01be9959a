@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "daa51119_2c3a438a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-10-07T16:18:34Z",
+      "side": 1,
+      "message": "Except the perm and version changes, this is mostly for gradle. Android.bp builds fine.",
+      "revId": "7903e12a99e7ae59d19d203bf3aae9a01be9959a",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
