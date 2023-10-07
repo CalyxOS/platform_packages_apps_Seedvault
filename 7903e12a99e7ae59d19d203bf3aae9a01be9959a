@@ -16,6 +16,24 @@
       "message": "Except the perm and version changes, this is mostly for gradle. Android.bp builds fine.",
       "revId": "7903e12a99e7ae59d19d203bf3aae9a01be9959a",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e1c3996_24913a26",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-10-07T19:23:22Z",
+      "side": 1,
+      "message": "21959: [DO NOT MEREG] Squashed upstream android14 merge | https://review.calyxos.org/c/CalyxOS/platform_packages_apps_Seedvault/+/21959",
+      "parentUuid": "daa51119_2c3a438a",
+      "revId": "7903e12a99e7ae59d19d203bf3aae9a01be9959a",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ],
   "submitRequirementResults": [
