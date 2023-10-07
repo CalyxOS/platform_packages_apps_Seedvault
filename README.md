@@ -25,8 +25,8 @@ We update it every time Google releases a new Android version, make any changes 
 
 This means that for ROMs using SeedVault it's recommended to use the same branch as your android version
 
-- This current branch `android13` is meant for usage with Android 13
-- This is indicated by the version name starting with `13`, and the version code starting with `33` - the Android 13 API version
+- This current branch `android14` is meant for usage with Android 14
+- This is indicated by the version name starting with `14`, and the version code starting with `34` - the Android 14 API version
 
 For older versions of Android, check out [the branches](https://github.com/seedvault-app/seedvault/branches).
 
@@ -50,6 +50,7 @@ It uses the same internal APIs as `adb backup` which is deprecated and thus need
 * `android.permission.MANAGE_EXTERNAL_STORAGE` to backup and restore files from device storage.
 * `android.permission.ACCESS_MEDIA_LOCATION` to backup original media files e.g. without stripped EXIF metadata.
 * `android.permission.FOREGROUND_SERVICE` to do periodic storage backups without interruption.
+* `android.permission.FOREGROUND_SERVICE_DATA_SYNC` to do periodic storage backups without interruption.
 * `android.permission.MANAGE_DOCUMENTS` to retrieve the available storage roots (optional) for better UX.
 * `android.permission.USE_BIOMETRIC` to authenticate saving a new recovery code
 * `android.permission.INTERACT_ACROSS_USERS_FULL` to use storage roots in other users (optional).
