@@ -1,7 +1,7 @@
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "org.jlleitschuh.gradle.ktlint" version "10.2.0"
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jlleitschuh.gradle.ktlint'
 }
 
 def gitDescribe = { ->
@@ -14,15 +14,22 @@ def gitDescribe = { ->
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    namespace 'com.stevesoltys.seedvault'
+    compileSdk rootProject.ext.compileSdk
 
     defaultConfig {
-        minSdkVersion 32 // leave at 32 for robolectric tests
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk 32 // leave at 32 for robolectric tests
+        targetSdk rootProject.ext.targetSdk
         versionNameSuffix "-$gitDescribe"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.stevesoltys.seedvault.KoinInstrumentationTestRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
+
+        if (project.hasProperty('instrumented_test_size')) {
+            final testSize = project.getProperty('instrumented_test_size')
+            println("Instrumented test size: $testSize")
+
+            testInstrumentationRunnerArguments size: testSize
+        }
     }
 
     buildTypes {
@@ -31,7 +38,7 @@ android {
         }
     }
 
-    lintOptions {
+    lint {
         disable "DialogFragmentCallbacksDetector",
                 "InvalidFragmentVersionForActivityResult",
                 "CheckedExceptions"
@@ -43,7 +50,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
-        languageVersion = "1.6"
+        languageVersion = "1.7"
     }
     testOptions {
         unitTests.all {
@@ -72,7 +79,7 @@ android {
             // https://android.googlesource.com/platform/build/+/refs/tags/android-11.0.0_r29/target/product/security/platform.pk8
             keyAlias "platform"
             keyPassword "platform"
-            storeFile file("platform.jks")
+            storeFile file("development/platform.jks")
             storePassword "platform"
         }
     }
@@ -150,10 +157,12 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5_version"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junit5_version"
 
+    androidTestImplementation rootProject.ext.aosp_libs
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation "io.mockk:mockk-android:$mockk_version"
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 }
 
 apply from: "${rootProject.rootDir}/gradle/ktlint.gradle"
@@ -169,5 +178,55 @@ configurations {
         resolutionStrategy {
             failOnNonReproducibleResolution()
         }
+    }
+}
+
+tasks.register('provisionEmulator', Exec) {
+    group("emulator")
+
+    dependsOn(tasks.assembleRelease)
+
+    doFirst {
+        commandLine "${project.projectDir}/development/scripts/provision_emulator.sh",
+                "seedvault",
+                "system-images;android-33;google_apis;x86_64"
+
+        environment "ANDROID_HOME", android.sdkDirectory.absolutePath
+        environment "JAVA_HOME", System.properties['java.home']
+    }
+}
+
+tasks.register('startEmulator', Exec) {
+    group("emulator")
+
+    doFirst {
+        commandLine "${project.projectDir}/development/scripts/start_emulator.sh", "seedvault"
+
+        environment "ANDROID_HOME", android.sdkDirectory.absolutePath
+        environment "JAVA_HOME", System.properties['java.home']
+    }
+}
+
+tasks.register('installEmulatorRelease', Exec) {
+    group("emulator")
+
+    dependsOn(tasks.assembleRelease)
+
+    doFirst {
+        commandLine "${project.projectDir}/development/scripts/install_app.sh"
+
+        environment "ANDROID_HOME", android.sdkDirectory.absolutePath
+        environment "JAVA_HOME", System.properties['java.home']
+    }
+}
+
+tasks.register('clearEmulatorAppData', Exec) {
+    group("emulator")
+
+    doFirst {
+        commandLine "${project.projectDir}/development/scripts/clear_app_data.sh"
+
+        environment "ANDROID_HOME", android.sdkDirectory.absolutePath
+        environment "JAVA_HOME", System.properties['java.home']
     }
 }
