@@ -16,6 +16,23 @@
       "message": "This we\u0027ll want, mainly for permission added.",
       "revId": "ba4d89f756b5a830ff7e06226e07610d6728a87e",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "af0174a4_401c7b1b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-10-09T23:15:32Z",
+      "side": 1,
+      "message": "Remerge once https://github.com/seedvault-app/seedvault/pull/579 is in",
+      "revId": "ba4d89f756b5a830ff7e06226e07610d6728a87e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
