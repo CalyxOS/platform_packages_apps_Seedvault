@@ -16,6 +16,23 @@
       "message": "This is mainly to match 14. Some nice changes too.",
       "revId": "106e50e81331ca7931a79ebd7c55e9aefb159142",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d1f2667_4fa64d76",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-10-17T19:24:34Z",
+      "side": 1,
+      "message": "Barely any changes that\u0027d affect Android.bp, this was mainly to be in sync with 14.\n\nQuick smoke test was ok.",
+      "revId": "106e50e81331ca7931a79ebd7c55e9aefb159142",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
