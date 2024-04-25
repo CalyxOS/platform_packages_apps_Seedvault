@@ -64,6 +64,10 @@
         android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Used to get the name of the current profile -->
+    <uses-permission android:name="android.permission.QUERY_USERS"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- Used for periodic storage backups -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
@@ -166,6 +170,11 @@
             </intent-filter>
         </receiver>
 
+        <!-- Used by Workmanager to schedule our workers -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
         <!-- Used to start actual BackupService depending on scheduling criteria -->
         <service
             android:name=".storage.StorageBackupJobService"
