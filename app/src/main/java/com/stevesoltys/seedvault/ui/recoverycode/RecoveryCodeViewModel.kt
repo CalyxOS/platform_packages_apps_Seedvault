@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.ui.recoverycode
 
 import android.app.backup.IBackupManager
@@ -103,8 +108,7 @@ internal class RecoveryCodeViewModel(
         // TODO this code is almost identical to BackupStorageViewModel#onLocationSet(), unify?
         GlobalScope.launch(Dispatchers.IO) {
             // remove old storage snapshots and clear cache
-            storageBackup.deleteAllSnapshots()
-            storageBackup.clearCache()
+            storageBackup.init()
             try {
                 // initialize the new location
                 if (backupManager.isBackupEnabled) backupInitializer.initialize({ }) {

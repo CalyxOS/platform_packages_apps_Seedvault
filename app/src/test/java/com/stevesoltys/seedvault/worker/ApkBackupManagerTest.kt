@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.worker
 
 import android.content.pm.ApplicationInfo
@@ -10,6 +15,7 @@ import com.stevesoltys.seedvault.metadata.PackageState.NOT_ALLOWED
 import com.stevesoltys.seedvault.metadata.PackageState.UNKNOWN_ERROR
 import com.stevesoltys.seedvault.metadata.PackageState.WAS_STOPPED
 import com.stevesoltys.seedvault.plugins.StoragePlugin
+import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.plugins.saf.FILE_BACKUP_METADATA
 import com.stevesoltys.seedvault.transport.TransportTest
 import com.stevesoltys.seedvault.transport.backup.PackageService
@@ -32,7 +38,8 @@ internal class ApkBackupManagerTest : TransportTest() {
 
     private val packageService: PackageService = mockk()
     private val apkBackup: ApkBackup = mockk()
-    private val plugin: StoragePlugin = mockk()
+    private val storagePluginManager: StoragePluginManager = mockk()
+    private val plugin: StoragePlugin<*> = mockk()
     private val nm: BackupNotificationManager = mockk()
 
     private val apkBackupManager = ApkBackupManager(
@@ -41,12 +48,16 @@ internal class ApkBackupManagerTest : TransportTest() {
         metadataManager = metadataManager,
         packageService = packageService,
         apkBackup = apkBackup,
-        plugin = plugin,
+        pluginManager = storagePluginManager,
         nm = nm,
     )
 
     private val metadataOutputStream = mockk<OutputStream>()
     private val packageMetadata: PackageMetadata = mockk()
+
+    init {
+        every { storagePluginManager.appPlugin } returns plugin
+    }
 
     @Test
     fun `Package state of app that is not stopped gets recorded as not-allowed`() = runBlocking {

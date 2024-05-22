@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.metadata
 
 import android.content.Context
@@ -57,6 +62,8 @@ internal class MetadataManager(
             }
             return field
         }
+
+    val backupSize: Long? get() = metadata.size
 
     /**
      * Call this when initializing a new device.

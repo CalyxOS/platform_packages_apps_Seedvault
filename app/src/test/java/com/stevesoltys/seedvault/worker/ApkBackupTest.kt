@@ -38,7 +38,6 @@ import java.io.OutputStream
 import java.nio.file.Path
 import kotlin.random.Random
 
-@Suppress("BlockingMethodInNonBlockingContext")
 internal class ApkBackupTest : BackupTest() {
 
     private val pm: PackageManager = mockk()
@@ -209,8 +208,8 @@ internal class ApkBackupTest : BackupTest() {
             version = packageInfo.longVersionCode,
             installer = getRandomString(),
             splits = listOf(
-                ApkSplit(split1Name, split1Sha256),
-                ApkSplit(split2Name, split2Sha256)
+                ApkSplit(split1Name, split1Bytes.size.toLong(), split1Sha256),
+                ApkSplit(split2Name, split2Bytes.size.toLong(), split2Sha256)
             ),
             sha256 = "eHx5jjmlvBkQNVuubQzYejay4Q_QICqD47trAF2oNHI",
             signatures = packageMetadata.signatures

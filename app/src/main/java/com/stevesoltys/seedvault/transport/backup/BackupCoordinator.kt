@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.transport.backup
 
 import android.app.backup.BackupTransport.FLAG_DATA_NOT_CHANGED
@@ -25,6 +30,8 @@ import com.stevesoltys.seedvault.metadata.PackageState.NO_DATA
 import com.stevesoltys.seedvault.metadata.PackageState.QUOTA_EXCEEDED
 import com.stevesoltys.seedvault.metadata.PackageState.UNKNOWN_ERROR
 import com.stevesoltys.seedvault.plugins.StoragePlugin
+import com.stevesoltys.seedvault.plugins.StoragePluginManager
+import com.stevesoltys.seedvault.plugins.isOutOfSpace
 import com.stevesoltys.seedvault.plugins.saf.FILE_BACKUP_METADATA
 import com.stevesoltys.seedvault.settings.SettingsManager
 import com.stevesoltys.seedvault.ui.notification.BackupNotificationManager
@@ -54,11 +61,10 @@ private class CoordinatorState(
  * @author Steve Soltys
  * @author Torsten Grote
  */
-@WorkerThread // entire class should always be accessed from a worker thread, so blocking is ok
-@Suppress("BlockingMethodInNonBlockingContext")
+@WorkerThread
 internal class BackupCoordinator(
     private val context: Context,
-    private val plugin: StoragePlugin,
+    private val pluginManager: StoragePluginManager,
     private val kv: KVBackup,
     private val full: FullBackup,
     private val clock: Clock,
@@ -68,6 +74,7 @@ internal class BackupCoordinator(
     private val nm: BackupNotificationManager,
 ) {
 
+    private val plugin get() = pluginManager.appPlugin
     private val state = CoordinatorState(
         calledInitialize = false,
         calledClearBackupData = false,
@@ -126,7 +133,7 @@ internal class BackupCoordinator(
     } catch (e: Exception) {
         Log.e(TAG, "Error initializing device", e)
         // Show error notification if we needed init or were ready for backups
-        if (metadataManager.requiresInit || settingsManager.canDoBackupNow()) nm.onBackupError()
+        if (metadataManager.requiresInit || pluginManager.canDoBackupNow()) nm.onBackupError()
         TRANSPORT_ERROR
     }
 
@@ -354,11 +361,12 @@ internal class BackupCoordinator(
             if (result == TRANSPORT_OK) {
                 val isNormalBackup = packageName != MAGIC_PACKAGE_MANAGER
                 // call onPackageBackedUp for @pm@ only if we can do backups right now
-                if (isNormalBackup || settingsManager.canDoBackupNow()) {
+                if (isNormalBackup || pluginManager.canDoBackupNow()) {
                     try {
                         onPackageBackedUp(packageInfo, BackupType.KV, size)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error calling onPackageBackedUp for $packageName", e)
+                        if (e.isOutOfSpace()) nm.onInsufficientSpaceError()
                         result = TRANSPORT_PACKAGE_REJECTED
                     }
                 }
@@ -379,6 +387,7 @@ internal class BackupCoordinator(
                 onPackageBackedUp(packageInfo, BackupType.FULL, size)
             } catch (e: Exception) {
                 Log.e(TAG, "Error calling onPackageBackedUp for $packageName", e)
+                if (e.isOutOfSpace()) nm.onInsufficientSpaceError()
                 result = TRANSPORT_PACKAGE_REJECTED
             }
             result
@@ -411,7 +420,7 @@ internal class BackupCoordinator(
         val longBackoff = DAYS.toMillis(30)
 
         // back off if there's no storage set
-        val storage = settingsManager.getStorage() ?: return longBackoff
+        val storage = pluginManager.storageProperties ?: return longBackoff
         return when {
             // back off if storage is removable and not available right now
             storage.isUnavailableUsb(context) -> longBackoff
@@ -425,7 +434,9 @@ internal class BackupCoordinator(
         }
     }
 
-    private suspend fun StoragePlugin.getMetadataOutputStream(token: Long? = null): OutputStream {
+    private suspend fun StoragePlugin<*>.getMetadataOutputStream(
+        token: Long? = null,
+    ): OutputStream {
         val t = token ?: settingsManager.getToken() ?: throw IOException("no current token")
         return getOutputStream(t, FILE_BACKUP_METADATA)
     }

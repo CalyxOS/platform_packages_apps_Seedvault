@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.transport.backup
 
 import android.app.backup.IBackupManager
@@ -18,6 +23,7 @@ import android.util.Log.INFO
 import androidx.annotation.WorkerThread
 import com.stevesoltys.seedvault.MAGIC_PACKAGE_MANAGER
 import com.stevesoltys.seedvault.plugins.StoragePlugin
+import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.settings.SettingsManager
 
 private val TAG = PackageService::class.java.simpleName
@@ -32,11 +38,12 @@ internal class PackageService(
     private val context: Context,
     private val backupManager: IBackupManager,
     private val settingsManager: SettingsManager,
-    private val plugin: StoragePlugin,
+    private val pluginManager: StoragePluginManager,
 ) {
 
     private val packageManager: PackageManager = context.packageManager
     private val myUserId = UserHandle.myUserId()
+    private val plugin: StoragePlugin<*> get() = pluginManager.appPlugin
 
     val eligiblePackages: List<String>
         @WorkerThread

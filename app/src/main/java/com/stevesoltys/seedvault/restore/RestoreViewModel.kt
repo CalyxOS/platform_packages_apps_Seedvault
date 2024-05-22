@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.restore
 
 import android.app.Application
@@ -28,6 +33,7 @@ import com.stevesoltys.seedvault.metadata.PackageState.NO_DATA
 import com.stevesoltys.seedvault.metadata.PackageState.QUOTA_EXCEEDED
 import com.stevesoltys.seedvault.metadata.PackageState.UNKNOWN_ERROR
 import com.stevesoltys.seedvault.metadata.PackageState.WAS_STOPPED
+import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_APPS
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_BACKUP
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_FILES
@@ -81,8 +87,9 @@ internal class RestoreViewModel(
     private val restoreCoordinator: RestoreCoordinator,
     private val apkRestore: ApkRestore,
     storageBackup: StorageBackup,
+    pluginManager: StoragePluginManager,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : RequireProvisioningViewModel(app, settingsManager, keyManager),
+) : RequireProvisioningViewModel(app, settingsManager, keyManager, pluginManager),
     RestorableBackupClickListener, SnapshotViewModel {
 
     override val isRestoreOperation = true

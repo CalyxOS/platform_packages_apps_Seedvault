@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.restore.install
 
 import android.content.Context
@@ -12,6 +17,7 @@ import com.stevesoltys.seedvault.metadata.PackageMetadata
 import com.stevesoltys.seedvault.metadata.PackageMetadataMap
 import com.stevesoltys.seedvault.plugins.LegacyStoragePlugin
 import com.stevesoltys.seedvault.plugins.StoragePlugin
+import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.restore.RestorableBackup
 import com.stevesoltys.seedvault.transport.TransportTest
 import com.stevesoltys.seedvault.worker.ApkBackup
@@ -38,7 +44,6 @@ import java.nio.file.Path
 import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
-@Suppress("BlockingMethodInNonBlockingContext")
 internal class ApkBackupRestoreTest : TransportTest() {
 
     private val pm: PackageManager = mockk()
@@ -46,20 +51,23 @@ internal class ApkBackupRestoreTest : TransportTest() {
         every { packageManager } returns pm
     }
 
+    private val storagePluginManager: StoragePluginManager = mockk()
     @Suppress("Deprecation")
     private val legacyStoragePlugin: LegacyStoragePlugin = mockk()
-    private val storagePlugin: StoragePlugin = mockk()
+    private val storagePlugin: StoragePlugin<*> = mockk()
     private val splitCompatChecker: ApkSplitCompatibilityChecker = mockk()
     private val apkInstaller: ApkInstaller = mockk()
+    private val installRestriction: InstallRestriction = mockk()
 
     private val apkBackup = ApkBackup(pm, crypto, settingsManager, metadataManager)
     private val apkRestore: ApkRestore = ApkRestore(
         context = strictContext,
-        storagePlugin = storagePlugin,
+        pluginManager = storagePluginManager,
         legacyStoragePlugin = legacyStoragePlugin,
         crypto = crypto,
         splitCompatChecker = splitCompatChecker,
-        apkInstaller = apkInstaller
+        apkInstaller = apkInstaller,
+        installRestriction = installRestriction,
     )
 
     private val signatureBytes = byteArrayOf(0x01, 0x02, 0x03)
@@ -75,7 +83,7 @@ internal class ApkBackupRestoreTest : TransportTest() {
         installer = getRandomString(),
         sha256 = "eHx5jjmlvBkQNVuubQzYejay4Q_QICqD47trAF2oNHI",
         signatures = listOf("AwIB"),
-        splits = listOf(ApkSplit(splitName, splitSha256))
+        splits = listOf(ApkSplit(splitName, Random.nextLong(), splitSha256))
     )
     private val packageMetadataMap: PackageMetadataMap = hashMapOf(packageName to packageMetadata)
     private val installerName = packageMetadata.installer
@@ -90,6 +98,7 @@ internal class ApkBackupRestoreTest : TransportTest() {
 
     init {
         mockkStatic(PackageUtils::class)
+        every { storagePluginManager.appPlugin } returns storagePlugin
     }
 
     @Test
@@ -130,6 +139,7 @@ internal class ApkBackupRestoreTest : TransportTest() {
         val apkPath = slot<String>()
         val cacheFiles = slot<List<File>>()
 
+        every { installRestriction.isAllowedToInstallApks() } returns true
         every { strictContext.cacheDir } returns tmpFile
         every { crypto.getNameForApk(salt, packageName, "") } returns name
         coEvery { storagePlugin.getInputStream(token, name) } returns inputStream

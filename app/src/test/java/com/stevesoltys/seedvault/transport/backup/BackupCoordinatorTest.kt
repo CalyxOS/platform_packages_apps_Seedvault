@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2020 The Calyx Institute
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.stevesoltys.seedvault.transport.backup
 
 import android.app.backup.BackupTransport.TRANSPORT_ERROR
@@ -16,8 +21,9 @@ import com.stevesoltys.seedvault.metadata.PackageMetadata
 import com.stevesoltys.seedvault.metadata.PackageState.NO_DATA
 import com.stevesoltys.seedvault.metadata.PackageState.QUOTA_EXCEEDED
 import com.stevesoltys.seedvault.plugins.StoragePlugin
+import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.plugins.saf.FILE_BACKUP_METADATA
-import com.stevesoltys.seedvault.settings.Storage
+import com.stevesoltys.seedvault.plugins.saf.SafStorage
 import com.stevesoltys.seedvault.ui.notification.BackupNotificationManager
 import com.stevesoltys.seedvault.worker.ApkBackup
 import io.mockk.Runs
@@ -33,10 +39,9 @@ import java.io.IOException
 import java.io.OutputStream
 import kotlin.random.Random
 
-@Suppress("BlockingMethodInNonBlockingContext")
 internal class BackupCoordinatorTest : BackupTest() {
 
-    private val plugin = mockk<StoragePlugin>()
+    private val pluginManager = mockk<StoragePluginManager>()
     private val kv = mockk<KVBackup>()
     private val full = mockk<FullBackup>()
     private val apkBackup = mockk<ApkBackup>()
@@ -44,26 +49,32 @@ internal class BackupCoordinatorTest : BackupTest() {
     private val packageService = mockk<PackageService>()
 
     private val backup = BackupCoordinator(
-        context,
-        plugin,
-        kv,
-        full,
-        clock,
-        packageService,
-        metadataManager,
-        settingsManager,
-        notificationManager
+        context = context,
+        pluginManager = pluginManager,
+        kv = kv,
+        full = full,
+        clock = clock,
+        packageService = packageService,
+        metadataManager = metadataManager,
+        settingsManager = settingsManager,
+        nm = notificationManager,
     )
 
+    private val plugin = mockk<StoragePlugin<*>>()
     private val metadataOutputStream = mockk<OutputStream>()
     private val fileDescriptor: ParcelFileDescriptor = mockk()
     private val packageMetadata: PackageMetadata = mockk()
-    private val storage = Storage(
-        uri = Uri.EMPTY,
+    private val safStorage = SafStorage(
+        config = Uri.EMPTY,
         name = getRandomString(),
         isUsb = false,
-        requiresNetwork = false
+        requiresNetwork = false,
+        rootId = null,
     )
+
+    init {
+        every { pluginManager.appPlugin } returns plugin
+    }
 
     @Test
     fun `device initialization succeeds and delegates to plugin`() = runBlocking {
@@ -90,7 +101,7 @@ internal class BackupCoordinatorTest : BackupTest() {
         expectStartNewRestoreSet()
         coEvery { plugin.initializeDevice() } throws IOException()
         every { metadataManager.requiresInit } returns maybeTrue
-        every { settingsManager.canDoBackupNow() } returns !maybeTrue
+        every { pluginManager.canDoBackupNow() } returns !maybeTrue
         every { notificationManager.onBackupError() } just Runs
 
         assertEquals(TRANSPORT_ERROR, backup.initializeDevice())
@@ -109,7 +120,7 @@ internal class BackupCoordinatorTest : BackupTest() {
             expectStartNewRestoreSet()
             coEvery { plugin.initializeDevice() } throws IOException()
             every { metadataManager.requiresInit } returns false
-            every { settingsManager.canDoBackupNow() } returns false
+            every { pluginManager.canDoBackupNow() } returns false
 
             assertEquals(TRANSPORT_ERROR, backup.initializeDevice())
 
@@ -125,7 +136,7 @@ internal class BackupCoordinatorTest : BackupTest() {
     fun `performIncrementalBackup of @pm@ causes re-init when legacy format`() = runBlocking {
         val packageInfo = PackageInfo().apply { packageName = MAGIC_PACKAGE_MANAGER }
 
-        every { settingsManager.canDoBackupNow() } returns true
+        every { pluginManager.canDoBackupNow() } returns true
         every { metadataManager.requiresInit } returns true
 
         // start new restore set
@@ -224,7 +235,7 @@ internal class BackupCoordinatorTest : BackupTest() {
         every { kv.getCurrentSize() } returns 42L
 
         coEvery { kv.finishBackup() } returns TRANSPORT_OK
-        every { settingsManager.canDoBackupNow() } returns false
+        every { pluginManager.canDoBackupNow() } returns false
 
         assertEquals(TRANSPORT_OK, backup.finishBackup())
     }
@@ -290,7 +301,7 @@ internal class BackupCoordinatorTest : BackupTest() {
             )
         } just Runs
         coEvery { full.cancelFullBackup(token, metadata.salt, false) } just Runs
-        every { settingsManager.getStorage() } returns storage
+        every { pluginManager.storageProperties } returns safStorage
         every { settingsManager.useMeteredNetwork } returns false
         every { metadataOutputStream.close() } just Runs
 
@@ -340,7 +351,7 @@ internal class BackupCoordinatorTest : BackupTest() {
             )
         } just Runs
         coEvery { full.cancelFullBackup(token, metadata.salt, false) } just Runs
-        every { settingsManager.getStorage() } returns storage
+        every { pluginManager.storageProperties } returns safStorage
         every { settingsManager.useMeteredNetwork } returns false
         every { metadataOutputStream.close() } just Runs
 
