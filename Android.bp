@@ -34,6 +34,7 @@ android_app {
         // bip39
         "seedvault-lib-kotlin-bip39",
         // WebDAV
+        "apache-commons-lang",
         "seedvault-lib-dav4jvm",
         "seedvault-lib-okhttp",
         "seedvault-lib-okio",
