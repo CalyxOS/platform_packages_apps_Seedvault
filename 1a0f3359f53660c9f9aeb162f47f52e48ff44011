@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37685294_aa686a26",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2024-07-16T17:33:24Z",
+      "side": 1,
+      "message": "Unfortunately there are other calls to appIsEligibleForBackup within the system so simply adding it here doesn\u0027t suffice. Would need frameworks workaround instead",
+      "revId": "1a0f3359f53660c9f9aeb162f47f52e48ff44011",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
