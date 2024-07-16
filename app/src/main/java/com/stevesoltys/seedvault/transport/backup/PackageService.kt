@@ -76,6 +76,7 @@ internal class PackageService(
             // add magic @pm@ package (PACKAGE_MANAGER_SENTINEL) which holds package manager data
             val packageArray = eligibleApps.toMutableList()
             packageArray.add(MAGIC_PACKAGE_MANAGER)
+            packageArray.add("org.lineageos.lineagesettings")
 
             return packageArray
         }
