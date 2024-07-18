@@ -159,13 +159,11 @@ dependencies {
      * in the top-level `libs` folder to reflect that.
      * You can copy these libraries from ~/.gradle/caches/modules-2/files-2.1
      */
-    // later versions than 2.1.1 require newer kotlin version
     implementation(fileTree("${rootProject.rootDir}/libs/koin-android").include("*.jar"))
     implementation(fileTree("${rootProject.rootDir}/libs/koin-android").include("*.aar"))
 
     implementation(fileTree("${rootProject.rootDir}/libs").include("kotlin-bip39-jvm-1.0.6.jar"))
 
-    // dav4jvm - later versions of okhttp need kotlin > 1.9.0
     implementation(fileTree("${rootProject.rootDir}/libs/dav4jvm").include("*.jar"))
 
     /**
@@ -176,11 +174,15 @@ dependencies {
     // anything less than 'implementation' fails tests run with gradlew
     testImplementation(aospLibs)
     testImplementation("androidx.test.ext:junit:1.1.5")
-    testImplementation("org.robolectric:robolectric:4.10.3")
+    testImplementation("org.robolectric:robolectric:4.12.2")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${libs.versions.junit5.get()}")
     testImplementation("org.junit.jupiter:junit-jupiter-params:${libs.versions.junit5.get()}")
     testImplementation("io.mockk:mockk:${libs.versions.mockk.get()}")
+    testImplementation(
+        "org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.coroutines.get()}"
+    )
+    testImplementation("app.cash.turbine:turbine:1.0.0")
     testImplementation("org.bitcoinj:bitcoinj-core:0.16.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${libs.versions.junit5.get()}")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:${libs.versions.junit5.get()}")
