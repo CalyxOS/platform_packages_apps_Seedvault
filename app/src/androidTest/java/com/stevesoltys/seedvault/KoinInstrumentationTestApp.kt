@@ -46,7 +46,20 @@ class KoinInstrumentationTestApp : App() {
 
             viewModel {
                 currentRestoreViewModel =
-                    spyk(RestoreViewModel(context, get(), get(), get(), get(), get(), get(), get()))
+                    spyk(
+                        RestoreViewModel(
+                            app = context,
+                            settingsManager = get(),
+                            keyManager = get(),
+                            backupManager = get(),
+                            restoreCoordinator = get(),
+                            apkRestore = get(),
+                            iconManager = get(),
+                            storageBackup = get(),
+                            pluginManager = get(),
+                            fileSelectionManager = get(),
+                        )
+                    )
                 currentRestoreViewModel!!
             }
 

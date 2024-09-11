@@ -17,9 +17,9 @@ import android.os.ServiceManager.getService
 import android.os.StrictMode
 import android.os.UserHandle
 import android.os.UserManager
-import android.provider.Settings
 import androidx.work.ExistingPeriodicWorkPolicy.UPDATE
 import androidx.work.WorkManager
+import com.google.android.material.color.DynamicColors
 import com.stevesoltys.seedvault.crypto.cryptoModule
 import com.stevesoltys.seedvault.header.headerModule
 import com.stevesoltys.seedvault.metadata.MetadataManager
@@ -27,15 +27,15 @@ import com.stevesoltys.seedvault.metadata.metadataModule
 import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.plugins.saf.storagePluginModuleSaf
 import com.stevesoltys.seedvault.plugins.webdav.storagePluginModuleWebDav
-import com.stevesoltys.seedvault.restore.RestoreViewModel
 import com.stevesoltys.seedvault.restore.install.installModule
+import com.stevesoltys.seedvault.restore.restoreUiModule
 import com.stevesoltys.seedvault.settings.AppListRetriever
 import com.stevesoltys.seedvault.settings.SettingsManager
 import com.stevesoltys.seedvault.settings.SettingsViewModel
 import com.stevesoltys.seedvault.storage.storageModule
+import com.stevesoltys.seedvault.transport.TRANSPORT_ID
 import com.stevesoltys.seedvault.transport.backup.backupModule
 import com.stevesoltys.seedvault.transport.restore.restoreModule
-import com.stevesoltys.seedvault.ui.files.FileSelectionViewModel
 import com.stevesoltys.seedvault.ui.notification.BackupNotificationManager
 import com.stevesoltys.seedvault.ui.recoverycode.RecoveryCodeViewModel
 import com.stevesoltys.seedvault.ui.storage.BackupStorageViewModel
@@ -95,12 +95,11 @@ open class App : Application() {
             )
         }
         viewModel { RestoreStorageViewModel(this@App, get(), get(), get(), get()) }
-        viewModel { RestoreViewModel(this@App, get(), get(), get(), get(), get(), get(), get()) }
-        viewModel { FileSelectionViewModel(this@App, get()) }
     }
 
     override fun onCreate() {
         super.onCreate()
+        DynamicColors.applyToActivitiesIfAvailable(this)
         startKoin()
         if (isDebugBuild()) {
             StrictMode.setThreadPolicy(
@@ -140,6 +139,7 @@ open class App : Application() {
         installModule,
         storageModule,
         workerModule,
+        restoreUiModule,
         appModule
     )
 
@@ -147,6 +147,7 @@ open class App : Application() {
     private val metadataManager: MetadataManager by inject()
     private val backupManager: IBackupManager by inject()
     private val pluginManager: StoragePluginManager by inject()
+    private val backupStateManager: BackupStateManager by inject()
 
     /**
      * The responsibility for the current token was moved to the [SettingsManager]
@@ -167,28 +168,27 @@ open class App : Application() {
      * Introduced in the first half of 2024 and can be removed after a suitable migration period.
      */
     protected open fun migrateToOwnScheduling() {
-        if (!isFrameworkSchedulingEnabled()) { // already on own scheduling
+        if (!backupStateManager.isFrameworkSchedulingEnabled) { // already on own scheduling
             // fix things for removable drive users who had a job scheduled here before
             if (pluginManager.isOnRemovableDrive) AppBackupWorker.unschedule(applicationContext)
             return
         }
 
-        backupManager.setFrameworkSchedulingEnabledForUser(UserHandle.myUserId(), false)
-        if (backupManager.isBackupEnabled && !pluginManager.isOnRemovableDrive) {
-            AppBackupWorker.schedule(applicationContext, settingsManager, UPDATE)
+        if (backupManager.currentTransport == TRANSPORT_ID) {
+            backupManager.setFrameworkSchedulingEnabledForUser(UserHandle.myUserId(), false)
+            if (backupManager.isBackupEnabled && !pluginManager.isOnRemovableDrive) {
+                AppBackupWorker.schedule(applicationContext, settingsManager, UPDATE)
+            }
+            // cancel old D2D worker
+            WorkManager.getInstance(this).cancelUniqueWork("APP_BACKUP")
         }
-        // cancel old D2D worker
-        WorkManager.getInstance(this).cancelUniqueWork("APP_BACKUP")
     }
-
-    private fun isFrameworkSchedulingEnabled(): Boolean = Settings.Secure.getInt(
-        contentResolver, Settings.Secure.BACKUP_SCHEDULING_ENABLED, 1
-    ) == 1 // 1 means enabled which is the default
 
 }
 
 const val MAGIC_PACKAGE_MANAGER: String = PACKAGE_MANAGER_SENTINEL
 const val ANCESTRAL_RECORD_KEY = "@ancestral_record@"
+const val NO_DATA_END_SENTINEL = "@end@"
 const val GLOBAL_METADATA_KEY = "@meta@"
 const val ERROR_BACKUP_CANCELLED: Int = BackupManager.ERROR_BACKUP_CANCELLED
 

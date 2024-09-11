@@ -12,6 +12,8 @@ import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_APPS
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_BACKUP
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_FILES
 import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_FILES_STARTED
+import com.stevesoltys.seedvault.restore.DisplayFragment.RESTORE_SELECT_FILES
+import com.stevesoltys.seedvault.restore.DisplayFragment.SELECT_APPS
 import com.stevesoltys.seedvault.restore.install.InstallProgressFragment
 import com.stevesoltys.seedvault.ui.RequireProvisioningActivity
 import com.stevesoltys.seedvault.ui.RequireProvisioningViewModel
@@ -28,19 +30,26 @@ class RestoreActivity : RequireProvisioningActivity() {
 
         setContentView(R.layout.activity_fragment_container)
 
-        viewModel.displayFragment.observeEvent(this, { fragment ->
+        viewModel.displayFragment.observeEvent(this) { fragment ->
             when (fragment) {
+                SELECT_APPS -> showFragment(AppSelectionFragment())
                 RESTORE_APPS -> showFragment(InstallProgressFragment())
                 RESTORE_BACKUP -> showFragment(RestoreProgressFragment())
                 RESTORE_FILES -> showFragment(RestoreFilesFragment())
-                RESTORE_FILES_STARTED -> showFragment(RestoreFilesStartedFragment())
+                RESTORE_SELECT_FILES -> showFragment(FilesSelectionFragment(), true)
+                RESTORE_FILES_STARTED -> {
+                    // pop back stack, so back navigation doesn't bring us to RESTORE_SELECT_FILES
+                    supportFragmentManager.popBackStackImmediate()
+                    showFragment(RestoreFilesStartedFragment())
+                }
                 else -> throw AssertionError()
             }
-        })
+        }
 
         if (savedInstanceState == null) {
             showFragment(RestoreSetFragment())
         }
+        viewModel.isSetupWizard = isSetupWizard
     }
 
     @CallSuper

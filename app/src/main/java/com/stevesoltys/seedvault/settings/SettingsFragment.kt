@@ -10,8 +10,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
 import android.os.RemoteException
-import android.provider.Settings
-import android.provider.Settings.Secure.BACKUP_AUTO_RESTORE
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
@@ -19,17 +17,19 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
-import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceChangeListener
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.TwoStatePreference
 import androidx.work.WorkInfo
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.stevesoltys.seedvault.BackupStateManager
 import com.stevesoltys.seedvault.R
 import com.stevesoltys.seedvault.permitDiskReads
 import com.stevesoltys.seedvault.plugins.StoragePluginManager
 import com.stevesoltys.seedvault.plugins.StorageProperties
 import com.stevesoltys.seedvault.restore.RestoreActivity
+import com.stevesoltys.seedvault.ui.notification.BackupNotificationManager
 import com.stevesoltys.seedvault.ui.toRelativeTime
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -41,7 +41,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private val viewModel: SettingsViewModel by sharedViewModel()
     private val storagePluginManager: StoragePluginManager by inject()
+    private val backupStateManager: BackupStateManager by inject()
     private val backupManager: IBackupManager by inject()
+    private val notificationManager: BackupNotificationManager by inject()
 
     private lateinit var backup: TwoStatePreference
     private lateinit var autoRestore: TwoStatePreference
@@ -77,7 +79,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             when (enabled) {
                 true -> return@OnPreferenceChangeListener trySetBackupEnabled(true)
                 false -> {
-                    AlertDialog.Builder(requireContext())
+                    MaterialAlertDialogBuilder(requireContext())
                         .setIcon(R.drawable.ic_warning)
                         .setTitle(R.string.settings_backup_dialog_title)
                         .setMessage(R.string.settings_backup_dialog_message)
@@ -123,7 +125,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         apkBackup.onPreferenceChangeListener = OnPreferenceChangeListener { _, newValue ->
             val enable = newValue as Boolean
             if (enable) return@OnPreferenceChangeListener true
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                 .setIcon(R.drawable.ic_warning)
                 .setTitle(R.string.settings_backup_apk_dialog_title)
                 .setMessage(R.string.settings_backup_apk_dialog_message)
@@ -184,14 +186,29 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setAppBackupSchedulingSummary(viewModel.appBackupWorkInfo.value)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Activity results from the parent will get delivered before and might tell us to finish.
+        // Don't start any new activities when that happens.
+        // Note: onStart() can get called *before* results get delivered, so we use onResume() here
+        if (requireActivity().isFinishing) return
+
+        // check that backup is provisioned
+        val activity = requireActivity() as SettingsActivity
+        if (!viewModel.recoveryCodeIsSet()) {
+            activity.showRecoveryCodeActivity()
+        } else if (!viewModel.validLocationIsSet()) {
+            activity.showStorageActivity()
+            // remove potential error notifications
+            notificationManager.onBackupErrorSeen()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.settings_menu, menu)
         menuBackupNow = menu.findItem(R.id.action_backup)
         menuRestore = menu.findItem(R.id.action_restore)
-        if (resources.getBoolean(R.bool.show_restore_in_settings)) {
-            menuRestore?.isVisible = true
-        }
         viewModel.backupPossible.observe(viewLifecycleOwner) { possible ->
             menuBackupNow?.isEnabled = possible
             menuRestore?.isEnabled = possible
@@ -251,7 +268,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun setAutoRestoreState() {
         activity?.contentResolver?.let {
-            autoRestore.isChecked = Settings.Secure.getInt(it, BACKUP_AUTO_RESTORE, 1) == 1
+            autoRestore.isChecked = backupStateManager.isAutoRestoreEnabled
         }
         val storage = this.storageProperties
         if (storage?.isUsb == true) {
@@ -313,7 +330,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun onEnablingStorageBackup() {
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.ic_warning)
             .setTitle(R.string.settings_backup_storage_dialog_title)
             .setMessage(R.string.settings_backup_storage_dialog_message)
@@ -341,7 +358,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun showCodeRegenerationNeededDialog() {
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.ic_vpn_key)
             .setTitle(R.string.settings_backup_new_code_dialog_title)
             .setMessage(R.string.settings_backup_new_code_dialog_message)
