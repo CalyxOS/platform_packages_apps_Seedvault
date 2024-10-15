@@ -9,7 +9,6 @@ import android.app.Application
 import android.app.backup.IBackupManager
 import android.app.job.JobInfo.NETWORK_TYPE_NONE
 import android.app.job.JobInfo.NETWORK_TYPE_UNMETERED
-import android.content.Intent
 import android.database.ContentObserver
 import android.net.ConnectivityManager
 import android.net.Network
@@ -18,12 +17,12 @@ import android.net.NetworkRequest
 import android.net.Uri
 import android.os.BadParcelableException
 import android.os.Process.myUid
+import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.annotation.UiThread
-import androidx.core.content.ContextCompat.startForegroundService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
@@ -36,20 +35,16 @@ import androidx.work.ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
 import androidx.work.WorkManager
 import com.stevesoltys.seedvault.BackupStateManager
 import com.stevesoltys.seedvault.R
+import com.stevesoltys.seedvault.backend.BackendManager
 import com.stevesoltys.seedvault.crypto.KeyManager
-import com.stevesoltys.seedvault.metadata.MetadataManager
 import com.stevesoltys.seedvault.permitDiskReads
-import com.stevesoltys.seedvault.plugins.StoragePluginManager
-import com.stevesoltys.seedvault.plugins.saf.SafStorage
 import com.stevesoltys.seedvault.storage.StorageBackupJobService
-import com.stevesoltys.seedvault.storage.StorageBackupService
-import com.stevesoltys.seedvault.storage.StorageBackupService.Companion.EXTRA_START_APP_BACKUP
-import com.stevesoltys.seedvault.transport.backup.BackupInitializer
 import com.stevesoltys.seedvault.ui.LiveEvent
 import com.stevesoltys.seedvault.ui.MutableLiveEvent
 import com.stevesoltys.seedvault.ui.RequireProvisioningViewModel
 import com.stevesoltys.seedvault.worker.AppBackupWorker
 import com.stevesoltys.seedvault.worker.AppBackupWorker.Companion.UNIQUE_WORK_NAME
+import com.stevesoltys.seedvault.worker.BackupRequester.Companion.requestFilesAndAppBackup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.calyxos.backup.storage.api.StorageBackup
 import org.calyxos.backup.storage.backup.BackupJobService
+import org.calyxos.seedvault.core.backends.saf.SafProperties
 import java.io.IOException
 import java.lang.Runtime.getRuntime
 import java.util.concurrent.TimeUnit.HOURS
@@ -69,14 +65,12 @@ internal class SettingsViewModel(
     app: Application,
     settingsManager: SettingsManager,
     keyManager: KeyManager,
-    private val pluginManager: StoragePluginManager,
-    private val metadataManager: MetadataManager,
+    backendManager: BackendManager,
     private val appListRetriever: AppListRetriever,
     private val storageBackup: StorageBackup,
     private val backupManager: IBackupManager,
-    private val backupInitializer: BackupInitializer,
     backupStateManager: BackupStateManager,
-) : RequireProvisioningViewModel(app, settingsManager, keyManager, pluginManager) {
+) : RequireProvisioningViewModel(app, settingsManager, keyManager, backendManager) {
 
     private val contentResolver = app.contentResolver
     private val connectivityManager: ConnectivityManager? =
@@ -84,12 +78,13 @@ internal class SettingsViewModel(
     private val workManager = WorkManager.getInstance(app)
 
     override val isRestoreOperation = false
+    val isFirstStart get() = settingsManager.isFirstStart
 
     val isBackupRunning: StateFlow<Boolean>
     private val mBackupPossible = MutableLiveData(false)
     val backupPossible: LiveData<Boolean> = mBackupPossible
 
-    internal val lastBackupTime = metadataManager.lastBackupTime
+    internal val lastBackupTime = settingsManager.lastBackupTime
     internal val appBackupWorkInfo =
         workManager.getWorkInfosForUniqueWorkLiveData(UNIQUE_WORK_NAME).map {
             it.getOrNull(0)
@@ -97,6 +92,9 @@ internal class SettingsViewModel(
 
     private val mAppStatusList = lastBackupTime.switchMap {
         // updates app list when lastBackupTime changes
+        // FIXME: Since we are currently updating that time a lot,
+        //  re-fetching everything on each change hammers the system hard
+        //  which can cause android.os.DeadObjectException
         getAppStatusResult()
     }
     internal val appStatusList: LiveData<AppStatusResult> = mAppStatusList
@@ -141,8 +139,6 @@ internal class SettingsViewModel(
             initialValue = false,
         )
         scope.launch {
-            // ensures the lastBackupTime LiveData gets set
-            metadataManager.getLastBackupTime()
             // update running state
             isBackupRunning.collect {
                 onBackupRunningStateChanged()
@@ -153,7 +149,7 @@ internal class SettingsViewModel(
     }
 
     override fun onStorageLocationChanged() {
-        val storage = pluginManager.storageProperties ?: return
+        val storage = backendManager.backendProperties ?: return
 
         Log.i(TAG, "onStorageLocationChanged (isUsb: ${storage.isUsb})")
         if (storage.isUsb) {
@@ -172,33 +168,33 @@ internal class SettingsViewModel(
     private fun onBackupRunningStateChanged() {
         if (isBackupRunning.value) mBackupPossible.postValue(false)
         else viewModelScope.launch(Dispatchers.IO) {
-            val canDo = !isBackupRunning.value && !pluginManager.isOnUnavailableUsb()
+            val canDo = !isBackupRunning.value && !backendManager.isOnUnavailableUsb()
             mBackupPossible.postValue(canDo)
         }
     }
 
     private fun onStoragePropertiesChanged() {
-        val storage = pluginManager.storageProperties ?: return
+        val properties = backendManager.backendProperties ?: return
 
         Log.d(TAG, "onStoragePropertiesChanged")
-        if (storage is SafStorage) {
+        if (properties is SafProperties) {
             // register storage observer
             try {
                 contentResolver.unregisterContentObserver(storageObserver)
-                contentResolver.registerContentObserver(storage.uri, false, storageObserver)
+                contentResolver.registerContentObserver(properties.uri, false, storageObserver)
             } catch (e: SecurityException) {
                 // This can happen if the app providing the storage was uninstalled.
                 // validLocationIsSet() gets called elsewhere
                 // and prompts for a new storage location.
-                Log.e(TAG, "Error registering content observer for ${storage.uri}", e)
+                Log.e(TAG, "Error registering content observer for ${properties.uri}", e)
             }
         }
 
         // register network observer if needed
-        if (networkCallback.registered && !storage.requiresNetwork) {
+        if (networkCallback.registered && !properties.requiresNetwork) {
             connectivityManager?.unregisterNetworkCallback(networkCallback)
             networkCallback.registered = false
-        } else if (!networkCallback.registered && storage.requiresNetwork) {
+        } else if (!networkCallback.registered && properties.requiresNetwork) {
             // TODO we may want to warn the user when they start a backup on a metered connection
             val request = NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -219,16 +215,8 @@ internal class SettingsViewModel(
     }
 
     internal fun backupNow() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (settingsManager.isStorageBackupEnabled()) {
-                val i = Intent(app, StorageBackupService::class.java)
-                // this starts an app backup afterwards
-                i.putExtra(EXTRA_START_APP_BACKUP, true)
-                startForegroundService(app, i)
-            } else {
-                AppBackupWorker.scheduleNow(app, reschedule = !pluginManager.isOnRemovableDrive)
-            }
-        }
+        val reschedule = !backendManager.isOnRemovableDrive
+        requestFilesAndAppBackup(app, settingsManager, backupManager, reschedule)
     }
 
     private fun getAppStatusResult(): LiveData<AppStatusResult> = liveData(Dispatchers.Default) {
@@ -264,21 +252,6 @@ internal class SettingsViewModel(
 
     fun onBackupEnabled(enabled: Boolean) {
         if (enabled) {
-            if (metadataManager.requiresInit) {
-                val onError: () -> Unit = {
-                    viewModelScope.launch(Dispatchers.Main) {
-                        val res = R.string.storage_check_fragment_backup_error
-                        Toast.makeText(app, res, LENGTH_LONG).show()
-                    }
-                }
-                viewModelScope.launch(Dispatchers.IO) {
-                    backupInitializer.initialize(onError) {
-                        mInitEvent.postEvent(false)
-                        scheduleAppBackup(CANCEL_AND_REENQUEUE)
-                    }
-                    mInitEvent.postEvent(true)
-                }
-            }
             // enable call log backups for existing installs (added end of 2020)
             enableCallLogBackup()
         } else {
@@ -305,14 +278,16 @@ internal class SettingsViewModel(
     }
 
     fun scheduleAppBackup(existingWorkPolicy: ExistingPeriodicWorkPolicy) {
-        if (!pluginManager.isOnRemovableDrive && backupManager.isBackupEnabled) {
+        // disable framework scheduling, because another transport may have enabled it
+        backupManager.setFrameworkSchedulingEnabledForUser(UserHandle.myUserId(), false)
+        if (!backendManager.isOnRemovableDrive && backupManager.isBackupEnabled) {
             AppBackupWorker.schedule(app, settingsManager, existingWorkPolicy)
         }
     }
 
     fun scheduleFilesBackup() {
-        if (!pluginManager.isOnRemovableDrive && settingsManager.isStorageBackupEnabled()) {
-            val requiresNetwork = pluginManager.storageProperties?.requiresNetwork == true
+        if (!backendManager.isOnRemovableDrive && settingsManager.isStorageBackupEnabled()) {
+            val requiresNetwork = backendManager.backendProperties?.requiresNetwork == true
             BackupJobService.scheduleJob(
                 context = app,
                 jobServiceClass = StorageBackupJobService::class.java,

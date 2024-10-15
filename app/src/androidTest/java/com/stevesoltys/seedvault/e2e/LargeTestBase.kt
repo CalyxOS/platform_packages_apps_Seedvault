@@ -85,7 +85,6 @@ internal interface LargeTestBase : KoinComponent {
 
     fun resetApplicationState() {
         backupManager.setAutoRestore(false)
-        settingsManager.setNewToken(null)
 
         val sharedPreferences = permitDiskReads {
             PreferenceManager.getDefaultSharedPreferences(targetContext)

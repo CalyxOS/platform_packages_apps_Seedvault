@@ -3,26 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-adb root
-sleep 5
-adb remount
+echo "Disable auto-restore"
+adb shell bmgr autorestore false
 
 echo "Installing Seedvault app..."
-adb shell mkdir -p /system/priv-app/Seedvault
-adb push app/build/outputs/apk/release/app-release.apk /system/priv-app/Seedvault/Seedvault.apk
-
-echo "Installing Seedvault permissions..."
-adb push permissions_com.stevesoltys.seedvault.xml /system/etc/permissions/privapp-permissions-seedvault.xml
-adb push allowlist_com.stevesoltys.seedvault.xml /system/etc/sysconfig/allowlist-seedvault.xml
-
-echo "Setting Seedvault transport..."
-sleep 10
-adb shell bmgr transport com.stevesoltys.seedvault.transport.ConfigurableBackupTransport
-
-D2D_BACKUP_TEST=$1
+./gradlew --stacktrace :app:installDebugAndroidTest
+sleep 60
 
 large_test_exit_code=0
-./gradlew --stacktrace -Pinstrumented_test_size=large -Pd2d_backup_test="$D2D_BACKUP_TEST" :app:connectedAndroidTest || large_test_exit_code=$?
+./gradlew --stacktrace -Pinstrumented_test_size=large :app:connectedAndroidTest || large_test_exit_code=$?
 
 adb pull /sdcard/seedvault_test_results
 

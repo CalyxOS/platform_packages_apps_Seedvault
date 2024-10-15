@@ -32,21 +32,35 @@ class KoinInstrumentationTestApp : App() {
         val testModule = module {
             val context = this@KoinInstrumentationTestApp
 
-            single { spyk(PackageService(context, get(), get(), get())) }
+            single { spyk(PackageService(context, get(), get())) }
             single { spyk(SettingsManager(context)) }
 
             single { spyk(BackupNotificationManager(context)) }
-            single { spyk(FullBackup(get(), get(), get(), get(), get())) }
-            single { spyk(KVBackup(get(), get(), get(), get(), get(), get())) }
+            single { spyk(FullBackup(get(), get(), get(), get())) }
+            single { spyk(KVBackup(get(), get(), get())) }
             single { spyk(InputFactory()) }
 
-            single { spyk(FullRestore(get(), get(), get(), get(), get())) }
-            single { spyk(KVRestore(get(), get(), get(), get(), get(), get())) }
+            single { spyk(FullRestore(get(), get(), get(), get(), get(), get())) }
+            single { spyk(KVRestore(get(), get(), get(), get(), get(), get(), get())) }
             single { spyk(OutputFactory()) }
 
             viewModel {
                 currentRestoreViewModel =
-                    spyk(RestoreViewModel(context, get(), get(), get(), get(), get(), get(), get()))
+                    spyk(
+                        RestoreViewModel(
+                            app = context,
+                            settingsManager = get(),
+                            keyManager = get(),
+                            backupManager = get(),
+                            restoreCoordinator = get(),
+                            appBackupManager = get(),
+                            apkRestore = get(),
+                            iconManager = get(),
+                            storageBackup = get(),
+                            backendManager = get(),
+                            fileSelectionManager = get(),
+                        )
+                    )
                 currentRestoreViewModel!!
             }
 

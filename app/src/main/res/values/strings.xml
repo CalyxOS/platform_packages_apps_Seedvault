@@ -9,7 +9,9 @@
     <string name="data_management_label">Seedvault Backup</string>
     <string name="current_destination_string">Backup status and settings</string>
 
+    <string name="first_start_text">Do you want to restore your device from an existing backup or start a new backup?</string>
     <string name="restore_backup_button">Restore backup</string>
+    <string name="setup_button">Start new</string>
 
     <!-- Settings -->
     <string name="settings_category_apps">App backup</string>
@@ -65,10 +67,6 @@
     <string name="settings_scheduling_charging_title">Back up only when charging</string>
 
     <string name="settings_expert_title">Expert settings</string>
-    <string name="settings_expert_quota_title">Unlimited app quota</string>
-    <string name="settings_expert_quota_summary">Do not impose a limitation on the size of app backups.\n\nWarning: This can fill up your storage location quickly. Not needed for most apps.</string>
-    <string name="settings_expert_d2d_title">Device-to-device backups</string>
-    <string name="settings_expert_d2d_summary">This forces backups for most apps, even when they disallow them. This is alpha, use at your own risk.</string>
     <string name="settings_expert_logcat_title">Save app log</string>
     <string name="settings_expert_logcat_summary">Developers can diagnose bugs with these logs.\n\nWarning: The log file might contain personally identifiable information. Review before and delete after sharing!</string>
     <string name="settings_expert_logcat_error">Error: Could not save app log</string>
@@ -76,8 +74,6 @@
     <!-- Storage Location -->
     <string name="storage_fragment_backup_title">Choose where to store backups</string>
     <string name="storage_fragment_restore_title">Where to find your backups?</string>
-    <string name="storage_fragment_warning">People with access to your storage location can learn which apps you use, but do not get access to the apps\' data.</string>
-    <string name="storage_fragment_warning_delete">Existing backups in this location will be deleted.</string>
     <string name="storage_user_selected_location_title">User-chosen location</string>
     <string name="storage_fake_drive_title">USB flash drive</string>
     <string name="storage_fake_drive_summary">Needs to be plugged in</string>
@@ -141,8 +137,8 @@
     <string name="recovery_code_verification_try_again">Try again</string>
     <string name="recovery_code_verification_generate_new">Generate new code</string>
     <string name="recovery_code_verification_new_dialog_title">Wait one second…</string>
-    <string name="recovery_code_verification_new_dialog_message">Generating a new code will make your existing backups inaccessible. We\'ll try to delete them if possible.\n\nAre you sure you want to do this?</string>
-    <string name="recovery_code_recreated">New recovery code has been created successfully</string>
+    <string name="recovery_code_verification_new_dialog_message">Generating a new code will make your existing backups inaccessible. We\'ll try to delete them if possible. This app will close when done.\n\nAre you sure you want to do this?</string>
+    <string name="recovery_code_recreated">New recovery code has been created successfully. Exiting…</string>
     <string name="recovery_code_auth_title">Re-enter your screen lock</string>
     <string name="recovery_code_auth_description">Enter your device credentials to continue</string>
 
@@ -150,6 +146,7 @@
     <string name="notification_channel_title">Backup notification</string>
     <string name="notification_success_channel_title">Success notification</string>
     <string name="notification_title">Backup running</string>
+    <string name="notification_init_text">Preparing existing backup data for reuse…</string>
     <string name="notification_apk_text">Backing up APK of %s</string>
     <string name="notification_apk_not_backed_up">Saving list of apps we can not back up.</string>
     <string name="notification_backup_already_running">Backup already in progress</string>
@@ -158,6 +155,7 @@
     <string name="notification_success_title">Backup finished</string>
     <string name="notification_success_text">%1$d of %2$d apps backed up (%3$s). Tap to learn more.</string>
     <string name="notification_failed_title">Backup failed</string>
+    <string name="notification_failed_text">An error occurred while running the backup.</string>
 
     <string name="notification_error_channel_title">Error notification</string>
     <string name="notification_error_title">Backup error</string>
@@ -167,6 +165,9 @@
     <string name="notification_space_error_title">Insufficient backup space</string>
     <string name="notification_space_error_text">Your backup location is running out of space. Free up space, so backups can run.</string>
 
+    <string name="notification_restore_channel_title">Restore notification</string>
+    <string name="notification_restore_title">Restore running</string>
+
     <string name="notification_restore_error_channel_title">Auto restore flash drive error</string>
     <string name="notification_restore_error_title">Could not restore data for %1$s</string>
     <string name="notification_restore_error_text">Plug in your %1$s before installing the app to restore its data from backup.</string>
@@ -175,14 +176,18 @@
     <string name="notification_error_no_main_key_title">Backups disabled</string>
     <string name="notification_error_no_main_key_text">Generate a new recovery code to complete upgrade and continue to use backups.</string>
 
+    <string name="notification_pruning_channel_title">Removing old backups notification</string>
+    <string name="notification_pruning_title">Removing old backups…</string>
+
     <!-- App Backup and Restore State -->
 
-    <string name="backup_section_system">System apps</string>
+    <string name="backup_section_system">System data</string>
     <string name="backup_sms">SMS text messages</string>
     <string name="backup_settings">Device settings</string>
     <string name="backup_call_log">Call history</string>
     <string name="backup_contacts">Local contacts</string>
-    <string name="backup_section_user">Installed apps</string>
+    <string name="backup_system_apps">System apps</string>
+    <string name="backup_section_user">Apps</string>
     <!-- This text gets shown for apps that the OS did not try to backup for whatever reason e.g. no backup was run yet -->
     <string name="backup_app_not_yet_backed_up">Waiting to back up…</string>
     <string name="restore_app_not_yet_backed_up">Was not yet backed up</string>
@@ -196,19 +201,26 @@
     <string name="backup_app_quota_exceeded">Backup quota exceeded</string>
     <string name="restore_app_quota_exceeded">Backup quota was exceeded</string>
     <string name="restore_app_not_installed">App not installed</string>
-    <string name="backup_section_not_allowed">Apps that do not allow data backup</string>
 
     <!-- Restore -->
     <string name="restore_title">Restore from backup</string>
     <string name="restore_choose_restore_set">Choose a backup to restore</string>
-    <string name="restore_restore_set_times">Last backup %1$s · First %2$s.</string>
-    <string name="restore_restore_set_size">Size: <xliff:g example="1 GB" id="size">%1$s</xliff:g></string>
+    <string name="restore_restore_set_apps">Has user data for <xliff:g example="42" id="apps">%1$d</xliff:g> apps (<xliff:g example="1 GB" id="size">%2$s</xliff:g>)</string>
+    <string name="restore_restore_set_apps_no_size">Has user data for <xliff:g example="42" id="apps">%1$d</xliff:g> apps</string>
+    <string name="restore_restore_set_apks">Contains <xliff:g example="42" id="apps">%1$d</xliff:g> apps (<xliff:g example="1 GB" id="size">%2$s</xliff:g>)</string>
+    <string name="restore_restore_set_apks_no_size">Contains <xliff:g example="42" id="apps">%1$d</xliff:g> apps</string>
     <string name="restore_skip">Don\'t restore</string>
     <string name="restore_skip_apps">Skip restoring apps</string>
     <string name="restore_invalid_location_title">No backups found</string>
     <string name="restore_invalid_location_message">We could not find any backups at this location.\n\nPlease choose another location that contains a %s folder.</string>
     <string name="restore_set_error">An error occurred while loading the backups.</string>
     <string name="restore_set_empty_result">No suitable backups found at given location.\n\nThis is most likely due to a wrong recovery code or a storage error.</string>
+    <string name="restore_select_packages">Select apps to restore</string>
+    <string name="restore_select_packages_all">All of the following apps</string>
+    <string name="restore_recycle_backup_title">Reuse this backup?</string>
+    <string name="restore_recycle_backup_text">You can reuse the backup \'%s\' you just restored on this device. This will make new backups faster and use less data.\n\nHowever, your old device will lose access to this backup. If you would like to keep the access for your old device, you can create a new backup instead. This will use more data than reusing the existing backup.</string>
+    <string name="restore_recycle_backup_button_no">Create new backup</string>
+    <string name="restore_recycle_backup_button_yes">Reuse backup</string>
     <string name="restore_installing_packages">Re-installing apps</string>
     <string name="restore_app_status_installing">Re-installing</string>
     <string name="restore_app_status_installed">Re-installed</string>
@@ -231,6 +243,7 @@
 
     <string name="restore_storage_skip">Skip restoring files</string>
     <string name="restore_storage_choose_snapshot">Choose a storage backup to restore (beta)</string>
+    <string name="restore_storage_selection_description">Selected files will be restored. Tap folders to see files in them.</string>
     <string name="restore_storage_in_progress_title">Files are being restored…</string>
     <string name="restore_storage_in_progress_info">Your files are being restored in the background. You can start using your phone while this is running.\n\nSome apps (e.g. Signal or WhatsApp) might require files to be fully restored to import a backup. Try to avoid starting those apps before file restore is complete.</string>
     <string name="restore_storage_got_it">Got it</string>
@@ -247,6 +260,6 @@
     <string name="about_contributor_headline">Contributors</string>
     <string name="about_contributor_content">Please see GitHub for a <a href="https://github.com/seedvault-app/seedvault/graphs/contributors">list of contributors</a>.</string>
     <string name="about_contributing_organizations_title">Contributing Organizations</string>
-    <string name="about_contributing_organizations_content"><a href="https://www.calyxinstitute.org">Calyx Institute</a> for use in <a href="https://calyxos.org">CalyxOS</a>\n<a href="https://nlnet.nl/project/Seedvault/">NGI0 PET Fund by NLnet</a></string>
+    <string name="about_contributing_organizations_content"><a href="https://www.calyxinstitute.org">Calyx Institute</a> for use in <a href="https://calyxos.org">CalyxOS</a>\n<a href="https://nlnet.nl/project/Seedvault/">NGI0 PET Fund by NLnet</a>\n<a href="https://nlnet.nl/project/SeedVault-Integrity/">NGI0 Entrust Fund by NLnet</a></string>
 
 </resources>

@@ -5,6 +5,7 @@
 
 package com.stevesoltys.seedvault.ui
 
+import android.os.Bundle
 import android.view.MenuItem
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,11 @@ import androidx.fragment.app.Fragment
 import com.stevesoltys.seedvault.R
 
 abstract class BackupActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setupEdgeToEdge()
+        super.onCreate(savedInstanceState)
+    }
 
     @CallSuper
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
@@ -24,8 +30,7 @@ abstract class BackupActivity : AppCompatActivity() {
 
     protected fun showFragment(f: Fragment, addToBackStack: Boolean = false, tag: String? = null) {
         supportFragmentManager.beginTransaction().apply {
-            if (tag == null) replace(R.id.fragment, f)
-            else replace(R.id.fragment, f, tag)
+            replace(R.id.fragment, f, tag)
             if (addToBackStack) addToBackStack(null)
             commit()
         }

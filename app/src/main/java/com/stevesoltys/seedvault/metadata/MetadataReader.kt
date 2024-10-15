@@ -56,7 +56,7 @@ internal class MetadataReaderImpl(private val crypto: Crypto) : MetadataReader {
         if (version == 0.toByte()) return readMetadataV0(inputStream, expectedToken)
 
         val metadataBytes = try {
-            crypto.newDecryptingStream(inputStream, getAD(version, expectedToken)).readBytes()
+            crypto.newDecryptingStreamV1(inputStream, getAD(version, expectedToken)).readBytes()
         } catch (e: GeneralSecurityException) {
             throw DecryptionFailedException(e)
         }
@@ -94,14 +94,14 @@ internal class MetadataReaderImpl(private val crypto: Crypto) : MetadataReader {
             val json = JSONObject(bytes.toString(Utf8))
             // get backup metadata and check expectations
             val meta = json.getJSONObject(JSON_METADATA)
-            val version = meta.getInt(JSON_METADATA_VERSION).toByte()
+            val version = meta.optInt(JSON_METADATA_VERSION, VERSION.toInt()).toByte()
             if (expectedVersion != null && version != expectedVersion) {
                 throw SecurityException(
                     "Invalid version '${version.toInt()}' in metadata," +
                         "expected '${expectedVersion.toInt()}'."
                 )
             }
-            val token = meta.getLong(JSON_METADATA_TOKEN)
+            val token = meta.optLong(JSON_METADATA_TOKEN, 0)
             if (expectedToken != null && token != expectedToken) throw SecurityException(
                 "Invalid token '$token' in metadata, expected '$expectedToken'."
             )
@@ -126,6 +126,7 @@ internal class MetadataReaderImpl(private val crypto: Crypto) : MetadataReader {
                     else -> null
                 }
                 val pSize = p.optLong(JSON_PACKAGE_SIZE, -1L)
+                val pName = p.optString(JSON_PACKAGE_APP_NAME)
                 val pSystem = p.optBoolean(JSON_PACKAGE_SYSTEM, false)
                 val pVersion = p.optLong(JSON_PACKAGE_VERSION, 0L)
                 val pInstaller = p.optString(JSON_PACKAGE_INSTALLER)
@@ -143,7 +144,9 @@ internal class MetadataReaderImpl(private val crypto: Crypto) : MetadataReader {
                     state = pState,
                     backupType = pBackupType,
                     size = if (pSize < 0L) null else pSize,
+                    name = if (pName == "") null else pName,
                     system = pSystem,
+                    isLaunchableSystemApp = p.optBoolean(JSON_PACKAGE_SYSTEM_LAUNCHER, false),
                     version = if (pVersion == 0L) null else pVersion,
                     installer = if (pInstaller == "") null else pInstaller,
                     splits = getSplits(p),
@@ -154,11 +157,11 @@ internal class MetadataReaderImpl(private val crypto: Crypto) : MetadataReader {
             return BackupMetadata(
                 version = version,
                 token = token,
-                salt = if (version == 0.toByte()) "" else meta.getString(JSON_METADATA_SALT),
-                time = meta.getLong(JSON_METADATA_TIME),
-                androidVersion = meta.getInt(JSON_METADATA_SDK_INT),
-                androidIncremental = meta.getString(JSON_METADATA_INCREMENTAL),
-                deviceName = meta.getString(JSON_METADATA_NAME),
+                salt = if (version == 0.toByte()) "" else meta.optString(JSON_METADATA_SALT, ""),
+                time = meta.optLong(JSON_METADATA_TIME, -1),
+                androidVersion = meta.optInt(JSON_METADATA_SDK_INT, 0),
+                androidIncremental = meta.optString(JSON_METADATA_INCREMENTAL),
+                deviceName = meta.optString(JSON_METADATA_NAME),
                 d2dBackup = meta.optBoolean(JSON_METADATA_D2D_BACKUP, false),
                 packageMetadataMap = packageMetadataMap,
             )

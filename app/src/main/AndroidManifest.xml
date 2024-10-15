@@ -7,8 +7,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.stevesoltys.seedvault"
-    android:versionCode="34040000"
-    android:versionName="14-4.0">
+    android:versionCode="35050000"
+    android:versionName="15-5.0">
     <!--
     The version code is the targeted SDK_VERSION plus 6 digits for our own version code.
     The version name is the targeted Android version followed by - and our own version name.
@@ -101,7 +101,9 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="true"
-            android:permission="com.stevesoltys.seedvault.OPEN_SETTINGS" />
+            android:launchMode="singleTask"
+            android:permission="com.stevesoltys.seedvault.OPEN_SETTINGS"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity-alias android:name=".settings.SettingsLink"
                 android:targetActivity=".settings.SettingsActivity"
@@ -115,7 +117,6 @@
 
         <activity
             android:name=".ui.storage.StorageActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
@@ -126,14 +127,14 @@
         <activity
             android:name=".ui.recoverycode.RecoveryCodeActivity"
             android:label="@string/recovery_code_title"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".restore.RestoreActivity"
             android:exported="true"
             android:label="@string/restore_title"
-            android:permission="com.stevesoltys.seedvault.RESTORE_BACKUP"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:launchMode="singleTask"
+            android:permission="com.stevesoltys.seedvault.RESTORE_BACKUP">
             <intent-filter>
                 <action android:name="com.stevesoltys.seedvault.RESTORE_BACKUP" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -167,18 +168,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".SecretCodeReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.telephony.action.SECRET_CODE" />
-                <!-- *#*#RESTORE#*#* -->
-                <data
-                    android:host="7378673"
-                    android:scheme="android_secret_code" />
-            </intent-filter>
-        </receiver>
-
         <!-- Used by Workmanager to schedule our workers -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
@@ -190,13 +179,19 @@
             android:exported="false"
             android:label="BackupJobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <!-- Does the actual backup work as a foreground service -->
+        <!-- Does app restore as a foreground service -->
+        <service
+            android:name=".restore.RestoreService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:label="RestoreService" />
+        <!-- Does the actual file backup work as a foreground service -->
         <service
             android:name=".storage.StorageBackupService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
             android:label="BackupService" />
-        <!-- Does restore as a foreground service -->
+        <!-- Does file restore as a foreground service -->
         <service
             android:name=".storage.StorageRestoreService"
             android:exported="false"

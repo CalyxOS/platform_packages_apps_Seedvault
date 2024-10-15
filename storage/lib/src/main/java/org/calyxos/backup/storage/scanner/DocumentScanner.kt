@@ -14,8 +14,8 @@ import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import org.calyxos.backup.storage.api.BackupFile
 import org.calyxos.backup.storage.content.DocFile
-import org.calyxos.backup.storage.getDocumentPath
-import org.calyxos.backup.storage.getVolume
+import org.calyxos.seedvault.core.backends.saf.getDocumentPath
+import org.calyxos.seedvault.core.backends.saf.getVolume
 
 public class DocumentScanner(context: Context) {
 
@@ -56,7 +56,7 @@ public class DocumentScanner(context: Context) {
             queryUri, PROJECTION, null, null, null
         )
         val documentFiles = ArrayList<DocFile>(cursor?.count ?: 0)
-        cursor?.use { it ->
+        cursor?.use {
             while (it.moveToNext()) {
                 val id = it.getString(PROJECTION_ID)
                 val documentUri = DocumentsContract.buildDocumentUriUsingTree(uri, id)

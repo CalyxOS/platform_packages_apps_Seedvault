@@ -1,3 +1,30 @@
+## [15-5.0] - 2024-10-15
+* First Android 15 release
+* New backup format using compression and deduplication
+* Can still restore old backups, but old Seedvault can't restore backups from this version
+* Faster and more reliable backups making snapshots that can individually be restored
+* Auto-cleaning of old backups
+* All backups now mimic device-to-device (allowing backup for all apps)
+* All backups now use a high per-app app quota
+* App backup (for APKs) moved to expert settings
+* Show more information for backups available to restore
+* Fix "Waiting to back up..." showing for apps
+
+## [14-4.1] - 2024-08-23
+* It is now possible to restore after setting up a profile
+* It is now possible to select what to restore (e.g. apps, files...)
+* Automatic backup scheduling can now be modified by the user
+* Native support for WebDAV
+* Support for RoundSync (if enabled by the OS)
+* Now in Material 3
+* Name of profile is now shown when selecting a backup to restore
+* Already installed apps are not reinstalled anymore
+* Already stored files do not create duplicates anymore
+* Respect policy when the installation of apps is disallowed
+* Storage backup is now beta instead of experimental
+* D2D is now alpha instead of experimental
+* Various corrections to the UI
+
 ## [14-4.0] - 2024-01-24
 * Add experimental support for forcing "D2D" transfer backups
 * Pretend to be a device-to-device transfer to allow backing up many apps which prevent backup

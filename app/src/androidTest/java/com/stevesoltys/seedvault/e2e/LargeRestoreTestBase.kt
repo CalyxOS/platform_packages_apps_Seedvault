@@ -63,7 +63,6 @@ internal interface LargeRestoreTestBase : LargeTestBase {
             full = mutableMapOf(),
             kv = mutableMapOf(),
             userApps = emptyList(), // will update everything below this after restore
-            userNotAllowedApps = emptyList()
         )
 
         spyOnRestoreData(result)
@@ -71,6 +70,10 @@ internal interface LargeRestoreTestBase : LargeTestBase {
         RestoreScreen {
             backupListItem.clickAndWaitForNewWindow()
             waitUntilIdle()
+
+            waitForAppSelectionLoaded()
+            // just tap next in app selection
+            appsSelectedButton.clickAndWaitForNewWindow()
 
             waitForInstallResult()
 
@@ -93,7 +96,6 @@ internal interface LargeRestoreTestBase : LargeTestBase {
 
         return result.copy(
             userApps = packageService.userApps,
-            userNotAllowedApps = packageService.userNotAllowedApps
         )
     }
 
@@ -104,13 +106,22 @@ internal interface LargeRestoreTestBase : LargeTestBase {
         spyOnKVRestoreData(result)
     }
 
+    private fun waitForAppSelectionLoaded() = runBlocking {
+        withContext(Dispatchers.Main) {
+            withTimeout(RESTORE_TIMEOUT) {
+                while (spyRestoreViewModel.selectedApps.value?.apps?.isNotEmpty() != true) {
+                    delay(100)
+                }
+            }
+        }
+        waitUntilIdle()
+    }
+
     private fun waitForInstallResult() = runBlocking {
 
         withContext(Dispatchers.Main) {
             withTimeout(RESTORE_TIMEOUT) {
-                while (spyRestoreViewModel.installResult.value == null ||
-                    spyRestoreViewModel.nextButtonEnabled.value == false
-                ) {
+                while (spyRestoreViewModel.installResult.value?.isFinished != true) {
                     delay(100)
                 }
             }
@@ -151,7 +162,7 @@ internal interface LargeRestoreTestBase : LargeTestBase {
         clearMocks(spyKVRestore)
 
         coEvery {
-            spyKVRestore.initializeState(any(), any(), any(), any(), any())
+            spyKVRestore.initializeState(any(), any(), any(), any())
         } answers {
             packageName = arg<PackageInfo>(3).packageName
             restoreResult.kv[packageName!!] = mutableMapOf()
@@ -176,7 +187,7 @@ internal interface LargeRestoreTestBase : LargeTestBase {
         clearMocks(spyFullRestore)
 
         coEvery {
-            spyFullRestore.initializeState(any(), any(), any(), any())
+            spyFullRestore.initializeState(any(), any(), any())
         } answers {
             packageName?.let {
                 restoreResult.full[it] = dataIntercept.toByteArray().sha256()
