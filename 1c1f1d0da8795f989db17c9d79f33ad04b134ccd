@@ -51,6 +51,24 @@
       "message": "The `git diff` of this is almost identical code-wise to what I\u0027ve already had checked out for android15 and been using on my daily driver, with only a very minor difference (apart from changelog, readme, strings, and version):\n```\n-            val device \u003d intent.extras?.getParcelable(EXTRA_DEVICE, UsbDevice::class.java) ?: return\n+            val device \u003d intent.extras?.getParcelable\u003cUsbDevice\u003e(EXTRA_DEVICE) ?: return\n```\n\nSo I\u0027d say if this exact code passes smoke test, it works.",
       "revId": "1c1f1d0da8795f989db17c9d79f33ad04b134ccd",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2d6c3ec0_a09b1938",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-10-17T22:47:30Z",
+      "side": 1,
+      "message": "Smoke test is fine.",
+      "parentUuid": "9a9dea3c_125b8974",
+      "revId": "1c1f1d0da8795f989db17c9d79f33ad04b134ccd",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
