@@ -38,13 +38,18 @@ import com.stevesoltys.seedvault.R
 import com.stevesoltys.seedvault.backend.BackendManager
 import com.stevesoltys.seedvault.crypto.KeyManager
 import com.stevesoltys.seedvault.permitDiskReads
+import com.stevesoltys.seedvault.repo.Checker
+import com.stevesoltys.seedvault.settings.BackupPermission.BackupAllowed
+import com.stevesoltys.seedvault.settings.BackupPermission.BackupRestricted
 import com.stevesoltys.seedvault.storage.StorageBackupJobService
 import com.stevesoltys.seedvault.ui.LiveEvent
 import com.stevesoltys.seedvault.ui.MutableLiveEvent
 import com.stevesoltys.seedvault.ui.RequireProvisioningViewModel
 import com.stevesoltys.seedvault.worker.AppBackupWorker
 import com.stevesoltys.seedvault.worker.AppBackupWorker.Companion.UNIQUE_WORK_NAME
+import com.stevesoltys.seedvault.worker.AppCheckerWorker
 import com.stevesoltys.seedvault.worker.BackupRequester.Companion.requestFilesAndAppBackup
+import com.stevesoltys.seedvault.worker.FileCheckerWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -61,6 +66,11 @@ import java.util.concurrent.TimeUnit.HOURS
 private const val TAG = "SettingsViewModel"
 private const val USER_FULL_DATA_BACKUP_AWARE = "user_full_data_backup_aware"
 
+sealed class BackupPermission {
+    object BackupAllowed : BackupPermission()
+    class BackupRestricted(val unavailableUsb: Boolean = false) : BackupPermission()
+}
+
 internal class SettingsViewModel(
     app: Application,
     settingsManager: SettingsManager,
@@ -69,6 +79,7 @@ internal class SettingsViewModel(
     private val appListRetriever: AppListRetriever,
     private val storageBackup: StorageBackup,
     private val backupManager: IBackupManager,
+    private val checker: Checker,
     backupStateManager: BackupStateManager,
 ) : RequireProvisioningViewModel(app, settingsManager, keyManager, backendManager) {
 
@@ -80,9 +91,15 @@ internal class SettingsViewModel(
     override val isRestoreOperation = false
     val isFirstStart get() = settingsManager.isFirstStart
 
-    val isBackupRunning: StateFlow<Boolean>
-    private val mBackupPossible = MutableLiveData(false)
-    val backupPossible: LiveData<Boolean> = mBackupPossible
+    private val isBackupRunning: StateFlow<Boolean>
+    private val isCheckOrPruneRunning: StateFlow<Boolean>
+    private val mBackupPossible = MutableLiveData<BackupPermission>(BackupRestricted())
+    val backupPossible: LiveData<BackupPermission> = mBackupPossible
+
+    private val mBackupSize = MutableLiveData<Long>()
+    val backupSize: LiveData<Long> = mBackupSize
+    private val mFilesBackupSize = MutableLiveData<Long>()
+    val filesBackupSize: LiveData<Long> = mFilesBackupSize
 
     internal val lastBackupTime = settingsManager.lastBackupTime
     internal val appBackupWorkInfo =
@@ -92,9 +109,6 @@ internal class SettingsViewModel(
 
     private val mAppStatusList = lastBackupTime.switchMap {
         // updates app list when lastBackupTime changes
-        // FIXME: Since we are currently updating that time a lot,
-        //  re-fetching everything on each change hammers the system hard
-        //  which can cause android.os.DeadObjectException
         getAppStatusResult()
     }
     internal val appStatusList: LiveData<AppStatusResult> = mAppStatusList
@@ -138,9 +152,20 @@ internal class SettingsViewModel(
             started = SharingStarted.Eagerly,
             initialValue = false,
         )
+        isCheckOrPruneRunning = backupStateManager.isCheckOrPruneRunning.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = false,
+        )
         scope.launch {
             // update running state
             isBackupRunning.collect {
+                onBackupRunningStateChanged()
+            }
+        }
+        scope.launch {
+            // update running state
+            isCheckOrPruneRunning.collect {
                 onBackupRunningStateChanged()
             }
         }
@@ -165,11 +190,23 @@ internal class SettingsViewModel(
         onStoragePropertiesChanged()
     }
 
-    private fun onBackupRunningStateChanged() {
-        if (isBackupRunning.value) mBackupPossible.postValue(false)
-        else viewModelScope.launch(Dispatchers.IO) {
-            val canDo = !isBackupRunning.value && !backendManager.isOnUnavailableUsb()
-            mBackupPossible.postValue(canDo)
+    private suspend fun onBackupRunningStateChanged() = withContext(Dispatchers.IO) {
+        val backupAllowed = !isBackupRunning.value && !isCheckOrPruneRunning.value
+        if (backupAllowed) {
+            if (backendManager.isOnUnavailableUsb()) {
+                updateBackupPossible(BackupRestricted(unavailableUsb = true))
+            } else {
+                updateBackupPossible(BackupAllowed)
+            }
+        } else updateBackupPossible(BackupRestricted())
+    }
+
+    /**
+     * Updates [mBackupPossible] on the UiThread to avoid race conditions.
+     */
+    private suspend fun updateBackupPossible(newValue: BackupPermission) {
+        withContext(Dispatchers.Main) {
+            mBackupPossible.value = newValue
         }
     }
 
@@ -203,7 +240,7 @@ internal class SettingsViewModel(
             networkCallback.registered = true
         }
         // update whether we can do backups right now or not
-        onBackupRunningStateChanged()
+        viewModelScope.launch { onBackupRunningStateChanged() }
     }
 
     override fun onCleared() {
@@ -306,6 +343,26 @@ internal class SettingsViewModel(
 
     fun cancelFilesBackup() {
         BackupJobService.cancelJob(app)
+    }
+
+    fun loadBackupSize() {
+        viewModelScope.launch(Dispatchers.IO) {
+            mBackupSize.postValue(checker.getBackupSize())
+        }
+    }
+
+    fun loadFileBackupSize() {
+        viewModelScope.launch(Dispatchers.IO) {
+            mFilesBackupSize.postValue(storageBackup.getBackupSize())
+        }
+    }
+
+    fun checkAppBackups(percent: Int) {
+        AppCheckerWorker.scheduleNow(app, percent)
+    }
+
+    fun checkFileBackups(percent: Int) {
+        FileCheckerWorker.scheduleNow(app, percent)
     }
 
     fun onLogcatUriReceived(uri: Uri?) = viewModelScope.launch(Dispatchers.IO) {

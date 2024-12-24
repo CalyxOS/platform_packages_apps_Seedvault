@@ -16,6 +16,8 @@ import com.stevesoltys.seedvault.storage.StorageBackupService
 import com.stevesoltys.seedvault.transport.ConfigurableBackupTransportService
 import com.stevesoltys.seedvault.worker.AppBackupPruneWorker
 import com.stevesoltys.seedvault.worker.AppBackupWorker.Companion.UNIQUE_WORK_NAME
+import com.stevesoltys.seedvault.worker.AppCheckerWorker
+import com.stevesoltys.seedvault.worker.FileCheckerWorker
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -32,18 +34,31 @@ class BackupStateManager(
         flow = ConfigurableBackupTransportService.isRunning,
         flow2 = StorageBackupService.isRunning,
         flow3 = workManager.getWorkInfosForUniqueWorkFlow(UNIQUE_WORK_NAME),
-        flow4 = workManager.getWorkInfosForUniqueWorkFlow(AppBackupPruneWorker.UNIQUE_WORK_NAME),
-    ) { appBackupRunning, filesBackupRunning, workInfo1, workInfo2 ->
+    ) { appBackupRunning, filesBackupRunning, workInfo1 ->
         val workInfoState1 = workInfo1.getOrNull(0)?.state
-        val workInfoState2 = workInfo2.getOrNull(0)?.state
         Log.i(
-            TAG, "appBackupRunning: $appBackupRunning, " +
+            TAG, "B - appBackupRunning: $appBackupRunning, " +
                 "filesBackupRunning: $filesBackupRunning, " +
-                "appBackupWorker: ${workInfoState1?.name}, " +
-                "pruneBackupWorker: ${workInfoState2?.name}"
+                "appBackupWorker: ${workInfoState1?.name}"
         )
-        appBackupRunning || filesBackupRunning ||
-            workInfoState1 == RUNNING || workInfoState2 == RUNNING
+        appBackupRunning || filesBackupRunning || workInfoState1 == RUNNING
+    }
+
+    val isCheckOrPruneRunning: Flow<Boolean> = combine(
+        flow = workManager.getWorkInfosForUniqueWorkFlow(AppBackupPruneWorker.UNIQUE_WORK_NAME),
+        flow2 = workManager.getWorkInfosForUniqueWorkFlow(AppCheckerWorker.UNIQUE_WORK_NAME),
+        flow3 = workManager.getWorkInfosForUniqueWorkFlow(FileCheckerWorker.UNIQUE_WORK_NAME),
+    ) { pruneInfo, appCheckInfo, fileCheckInfo ->
+        val pruneInfoState = pruneInfo.getOrNull(0)?.state
+        val appCheckState = appCheckInfo.getOrNull(0)?.state
+        val fileCheckState = fileCheckInfo.getOrNull(0)?.state
+        Log.i(
+            TAG,
+            "C - pruneBackupWorker: ${pruneInfoState?.name}, " +
+                "appCheckerWorker: ${appCheckState?.name}, " +
+                "fileCheckerWorker: ${fileCheckState?.name}"
+        )
+        pruneInfoState == RUNNING || appCheckState == RUNNING || fileCheckState == RUNNING
     }
 
     val isAutoRestoreEnabled: Boolean
