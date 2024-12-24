@@ -67,14 +67,7 @@ open class App : Application() {
         single { SettingsManager(this@App) }
         single { BackupNotificationManager(this@App) }
         single { BackendManager(this@App, get(), get(), get()) }
-        single {
-            BackendFactory {
-                // uses context of the device's main user to be able to access USB storage
-                this@App.applicationContext.getStorageContext {
-                    get<SettingsManager>().getSafProperties()?.isUsb == true
-                }
-            }
-        }
+        single { BackendFactory() }
         single { BackupStateManager(this@App) }
         single { Clock() }
         factory<IBackupManager> { IBackupManager.Stub.asInterface(getService(BACKUP_SERVICE)) }
@@ -90,6 +83,7 @@ open class App : Application() {
                 storageBackup = get(),
                 backupManager = get(),
                 backupStateManager = get(),
+                checker = get(),
             )
         }
         viewModel {
