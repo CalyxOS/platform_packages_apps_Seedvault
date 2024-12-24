@@ -16,6 +16,7 @@ import com.stevesoltys.seedvault.settings.StoragePluginType
 import org.calyxos.seedvault.core.backends.Backend
 import org.calyxos.seedvault.core.backends.BackendFactory
 import org.calyxos.seedvault.core.backends.BackendProperties
+import org.calyxos.seedvault.core.backends.IBackendManager
 import org.calyxos.seedvault.core.backends.saf.SafBackend
 
 class BackendManager(
@@ -23,12 +24,15 @@ class BackendManager(
     private val settingsManager: SettingsManager,
     private val blobCache: BlobCache,
     backendFactory: BackendFactory,
-) {
+) : IBackendManager {
 
+    @Volatile
     private var mBackend: Backend?
+
+    @Volatile
     private var mBackendProperties: BackendProperties<*>?
 
-    val backend: Backend
+    override val backend: Backend
         @Synchronized
         get() {
             return mBackend ?: error("App plugin was loaded, but still null")
@@ -39,14 +43,17 @@ class BackendManager(
         get() {
             return mBackendProperties
         }
-    val isOnRemovableDrive: Boolean get() = backendProperties?.isUsb == true
+    override val isOnRemovableDrive: Boolean get() = backendProperties?.isUsb == true
+    override val requiresNetwork: Boolean get() = backendProperties?.requiresNetwork == true
 
     init {
         when (settingsManager.storagePluginType) {
             StoragePluginType.SAF -> {
-                val safConfig = settingsManager.getSafProperties() ?: error("No SAF storage saved")
-                mBackend = backendFactory.createSafBackend(safConfig)
-                mBackendProperties = safConfig
+                val safProperties = settingsManager.getSafProperties()
+                    ?: error("No SAF storage saved")
+                val ctx = context.getStorageContext { safProperties.isUsb }
+                mBackend = backendFactory.createSafBackend(ctx, safProperties)
+                mBackendProperties = safProperties
             }
 
             StoragePluginType.WEB_DAV -> {
@@ -81,6 +88,8 @@ class BackendManager(
      * IMPORTANT: Do no call this while current plugins are being used,
      *            e.g. while backup/restore operation is still running.
      */
+    @WorkerThread
+    @Synchronized
     fun <T> changePlugins(
         backend: Backend,
         storageProperties: BackendProperties<T>,
