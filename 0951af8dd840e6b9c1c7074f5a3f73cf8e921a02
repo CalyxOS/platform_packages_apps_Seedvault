@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c3d4f4dd_142c1e66",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-12-26T15:09:23Z",
+      "side": 1,
+      "message": "I had an odd failure to verify all my files backup snapshots (all of them) at first. It was fine the second time, and fine again when verifying 100% of them. There may be some obscure bug there, but I don\u0027t see it as a blocker.",
+      "revId": "0951af8dd840e6b9c1c7074f5a3f73cf8e921a02",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
