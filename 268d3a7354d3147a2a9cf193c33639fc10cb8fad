@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ceb8a8b2_70960677",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-12-27T15:43:25Z",
+      "side": 1,
+      "message": "Tested when initially merged upstream, and follow up commit just tested this in-tree",
+      "revId": "268d3a7354d3147a2a9cf193c33639fc10cb8fad",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
