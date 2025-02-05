@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed72280a_d9a18aff",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2025-02-05T11:16:55Z",
+      "side": 1,
+      "message": "With this chain, the only difference is this commit https://github.com/seedvault-app/seedvault/commit/bc575ac1d064498816380986e99a1675b304858c so I think everything open is good to go",
+      "revId": "96f49e660dc8d5b3bc83939cf3d6b8a802abc25d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
