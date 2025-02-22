@@ -26,12 +26,6 @@
     <!-- This is needed to inform users about backup status and errors -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- (Optional) This is needed to retrieve the available storage roots.
-         The user needs to manually select a storage root, if not granted. -->
-    <uses-permission
-        android:name="android.permission.MANAGE_DOCUMENTS"
-        tools:ignore="ProtectedPermissions" />
-
     <!-- This is needed to access the serial number of USB mass storage devices -->
     <uses-permission
         android:name="android.permission.MANAGE_USB"
