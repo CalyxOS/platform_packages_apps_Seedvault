@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "29c3d0ea_efdc9f02",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-03-12T14:09:36Z",
+      "side": 1,
+      "message": "Upstream fix: https://github.com/seedvault-app/seedvault/pull/884",
+      "revId": "ad4d4ae6c4e1e75f7a975bb60931cc33781e955c",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
