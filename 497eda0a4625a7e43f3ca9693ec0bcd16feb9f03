@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "662b35f9_5ec896d3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-06-17T00:30:46Z",
+      "side": 1,
+      "message": "This will get merged into Seedvault upstream and then we can create a merge commit here based on that.",
+      "revId": "497eda0a4625a7e43f3ca9693ec0bcd16feb9f03",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
