@@ -16,6 +16,24 @@
       "message": "This icon gets used in settings as well, best not to change it, but to add the new one separately and change the references in BackupNotificationManager.",
       "revId": "927fe8be0312c87f393a739cb0801cf484cb1900",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26a554ae_d30334b5",
+        "filename": "app/src/main/res/drawable/ic_cloud_upload.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2026-04-15T16:44:19Z",
+      "side": 0,
+      "message": "Also, we have lots of different notifications and different icons for each. All are in some cloud. E.g. when the backup is done, there\u0027s a checkmark in the cloud.",
+      "parentUuid": "edddde8a_51599cd9",
+      "revId": "927fe8be0312c87f393a739cb0801cf484cb1900",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
